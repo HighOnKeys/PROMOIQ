@@ -12,6 +12,17 @@ It runs fully offline in about 20 s for the 50-episode pack. Any LLM can be plug
 
 > PROMOIQ analyses screenplay text only. It cannot verify actual video frames, acting performance, editing quality or audience engagement.
 
+## Submission
+
+Kumar Manas, roll no. 23119016, kumar_m@me.iitr.ac.in
+
+| Item | Where |
+|---|---|
+| Solution doc (2 pages) | [`docs/PROMOIQ_solution.pdf`](docs/PROMOIQ_solution.pdf) |
+| Prototype | this repository: run steps below, editorial app in `app.py` |
+| Raw outputs on the full pack | shared through the submission form only. They contain Kuku's screenplay text, so they are not in this public repo |
+| Quality evidence | [`evaluation/evaluation_report.md`](evaluation/evaluation_report.md), [`evaluation/failure_analysis.md`](evaluation/failure_analysis.md), [`evaluation/final_audit_report.md`](evaluation/final_audit_report.md) |
+
 ## Quick start
 
 ```bash
