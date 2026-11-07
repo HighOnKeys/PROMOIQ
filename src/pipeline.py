@@ -126,15 +126,24 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
     heur = HeuristicAnnotator()
     annotator = LLMAnnotator(gen_gw, heur) if gen_gw else heur
     ann = {}
-    prev_log = ""
-    for k, ep in enumerate(episodes):
-        if isinstance(annotator, LLMAnnotator):
-            res = annotator.annotate_episode(ep, beats_by_ep[ep.episode], events_by_id, signals, prev_log)
-        else:
-            res = annotator.annotate_episode(ep, beats_by_ep[ep.episode], events_by_id, signals)
-        ann.update({a.beat_id: a for a in res})
-        prev_log = ep.logline
-        progress("Scoring dramatic features", 0.15 + 0.25 * (k + 1) / len(episodes))
+    prev_logs = {ep.episode: (episodes[i - 1].logline if i else "") for i, ep in enumerate(episodes)}
+    epc = max(1, st.model.episodes_per_call)
+    if isinstance(annotator, LLMAnnotator) and epc > 1:
+        for k in range(0, len(episodes), epc):
+            chunk = episodes[k:k + epc]
+            res = annotator.annotate_batch([(ep, beats_by_ep[ep.episode], prev_logs[ep.episode]) for ep in chunk],
+                                           events_by_id, signals)
+            ann.update({a.beat_id: a for a in res})
+            progress(f"LLM scoring episodes {chunk[0].episode}-{chunk[-1].episode}",
+                     0.15 + 0.25 * min(1.0, (k + epc) / len(episodes)))
+    else:
+        for k, ep in enumerate(episodes):
+            if isinstance(annotator, LLMAnnotator):
+                res = annotator.annotate_episode(ep, beats_by_ep[ep.episode], events_by_id, signals, prev_logs[ep.episode])
+            else:
+                res = annotator.annotate_episode(ep, beats_by_ep[ep.episode], events_by_id, signals)
+            ann.update({a.beat_id: a for a in res})
+            progress("Scoring dramatic features", 0.15 + 0.25 * (k + 1) / len(episodes))
     timelines = {ep.episode: EpisodeTimeline(ep, beats_by_ep[ep.episode], ann, events_by_id, signals, st.weights,
                                              st.constraints.hook_window, st.constraints.cliff_window)
                  for ep in episodes}
@@ -219,15 +228,35 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
     cold_llm = ColdViewerJudge(show, judge_gw) if judge_gw else None
     integ_llm = IntegrityJudge(show, judge_gw) if judge_gw else None
     evals, validated, rejected = {}, [], []
-    llm_budget = 30
     ranked_by_q = sorted(cand_list, key=lambda c: -c.scores.quality)
+    hard = {c.promo_id: validator.validate(c) for c in ranked_by_q}
+    # LLM judges are spent on DISTINCT strong candidates only: valid, past the cheap hook and
+    # cliffhanger gates, and not a boundary variant (>50% time overlap) of one already chosen.
+    llm_set: list = []
+    if cold_llm is not None:
+        from src.ranking.portfolio import time_overlap
+        for c in ranked_by_q:
+            if len(llm_set) >= st.model.judge_budget:
+                break
+            if not hard[c.promo_id]["valid"] or c.scores.hook < st.gates.hook_pass \
+                    or c.scores.cliffhanger < st.gates.cliffhanger_pass:
+                continue
+            if any(time_overlap(c, x) > 0.5 for x in llm_set):
+                continue
+            llm_set.append(c)
+    llm_ids = {c.promo_id for c in llm_set}
+    llm_judged: set = set()
     for n, c in enumerate(ranked_by_q):
-        v = validator.validate(c)
-        use_llm = cold_llm is not None and v["valid"] and n < llm_budget * 3 and llm_budget > 0
+        v = hard[c.promo_id]
+        use_llm = c.promo_id in llm_ids
+        if use_llm:
+            progress(f"LLM judging {len(llm_judged) + 1}/{len(llm_ids)}", 0.70 + 0.15 * len(llm_judged) / max(1, len(llm_ids)))
         cv = (cold_llm if use_llm else cold).judge(c)
         ig = (integ_llm if use_llm else integ).judge(c)
+        # count it as LLM-judged only if both judges actually answered (they fall back on errors)
+        use_llm = use_llm and not cv.judge.startswith("heuristic") and not ig.judge.startswith("heuristic")
         if use_llm:
-            llm_budget -= 1
+            llm_judged.add(c.promo_id)
         reasons = [f"hard:{f}" for f in v["failed"]]
         g = st.gates
         if c.scores.hook < g.hook_pass:
@@ -244,10 +273,9 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
         if use_llm:
             final_score = 0.6 * final_score + 0.4 * (cv.clarity_score + ig.cliffhanger_score + ig.coherence_score) / 3
         evals[c.promo_id] = {"validation": v, "cold_viewer": cv.model_dump(), "integrity": ig.model_dump(),
-                             "final_score": round(final_score, 3), "gate_failures": reasons}
+                             "final_score": round(final_score, 3), "gate_failures": reasons,
+                             "judged_by": cv.judge if use_llm else "heuristic"}
         (rejected if reasons else validated).append(c)
-        if n % 200 == 0:
-            progress("Validating and judging candidates", 0.70 + 0.15 * n / max(1, len(ranked_by_q)))
     _dump(raw / "evaluation_results.json", evals)
     _dump(proc / "validated_promos.json", [{**c.model_dump(), "final_score": evals[c.promo_id]["final_score"]} for c in validated])
     _dump(proc / "rejected_candidates.json", [{"promo_id": c.promo_id, "mode": c.mode,
@@ -260,7 +288,12 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
     progress("Diversity-aware ranking", 0.88)
     psim = PromoSimilarity(show, seg_sim, lambda p: segs_of[p.promo_id])
     quality = {c.promo_id: evals[c.promo_id]["final_score"] for c in validated}
-    shortlist, dup_log = mmr_shortlist(validated, quality, psim, st.ranking.shortlist_size, st.ranking.mmr_lambda,
+    # With LLM judges, LLM-blended and heuristic-only scores are on different scales: rank only
+    # within the LLM-judged pool (it already holds the strongest distinct candidates).
+    pool = [c for c in validated if c.promo_id in llm_judged] if llm_judged else validated
+    if llm_judged and len(pool) < st.ranking.shortlist_size:
+        log.warning("only %d LLM-judged candidates passed the gates; shortlist will be shorter", len(pool))
+    shortlist, dup_log = mmr_shortlist(pool, quality, psim, st.ranking.shortlist_size, st.ranking.mmr_lambda,
                                        st.ranking.min_quality_ratio, st.ranking.duplicate_threshold)
     # MMR decides WHO is in the shortlist; within it, post order follows quality.
     mmr_order = {c.promo_id: k for k, c in enumerate(shortlist, 1)}
@@ -309,7 +342,7 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
     floor = min((quality[c.promo_id] for c in shortlist), default=0.0)
     chosen = {c.promo_id for c in shortlist}
     alternatives = []
-    for c in sorted(validated, key=lambda c: -quality[c.promo_id]):
+    for c in sorted(pool, key=lambda c: -quality[c.promo_id]):
         if c.promo_id in chosen or quality[c.promo_id] < floor:
             continue
         sims = sorted(((psim.detail(c, s), s) for s in shortlist), key=lambda x: -x[0]["combined"])
@@ -346,8 +379,9 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
     _dump(proc / "duplicate_flags.json", dup_log)
     mark("rank")
 
-    usage = {"generator": gen_gw.usage.as_dict() if gen_gw else {"calls": 0, "note": "offline heuristic provider"},
-             "judge": judge_gw.usage.as_dict() if judge_gw and judge_gw is not gen_gw else None}
+    usage = {"generator": gen_gw.usage.as_dict(gen_gw.real_tokens) if gen_gw else {"calls": 0, "note": "offline heuristic provider"},
+             "judge": judge_gw.usage.as_dict(judge_gw.real_tokens) if judge_gw and judge_gw is not gen_gw else None}
+    annot_sources = Counter(a.annotator for a in ann.values())
     reject_reasons = Counter(re.sub(r"\s[\d.]+$", "", r.split(" (")[0].split(":")[0]) if not r.startswith("hard:") else r
                              for c in rejected for r in evals[c.promo_id]["gate_failures"])
     meta = {
@@ -362,6 +396,9 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
                    "embeddings": seg_sim.backend},
         "usage": usage,
         "unverified_llm_quotes": getattr(annotator, "unverified_quotes", []),
+        "beat_annotation_sources": dict(annot_sources),
+        "llm_judging": {"budget": st.model.judge_budget if judge_gw else 0, "selected": len(llm_ids),
+                        "judged_ok": len(llm_judged), "ranking_pool": len(pool)},
         "settings": {"weights": vars(st.weights), "search": vars(st.search), "gates": vars(st.gates),
                      "ranking": vars(st.ranking), "constraints": vars(st.constraints)},
     }

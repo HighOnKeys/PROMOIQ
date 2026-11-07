@@ -57,5 +57,34 @@ Setup: 18 clips (PROMOIQ 8, B 5, A0 5) were shuffled with system labels hidden, 
 
 ## What a real validation would add
 1. Human editors fill in `human_eval/human_ratings_TEMPLATE.csv` for the fresh blind sheet in `outputs/evaluation/`. Then run `python -m evaluation.review_summary <file>`.
-2. Run Baseline A and the LLM judges with a key, ideally using a different model as the judge.
+2. Run Baseline A on all 50 episodes and LLM-judge 30+ candidates. The free tier only allowed 12 episodes and 9 candidates (see below).
 3. Online: A/B test shortlisted promos against editor-picked ones on 3-second hold rate, completion and click-through to episode 1, and track how many shortlist picks editors keep.
+
+## Live LLM run: Gemini free tier
+
+**Setup.**
+- Annotation: `gemini-3-flash-preview`, 5 episodes per call (10 calls) plus 1 story-bible call.
+- Judges: `gemini-3.1-flash-lite`, a different model, judging 9 distinct candidates (18 calls).
+- Baseline A: `gemini-3.6-flash`, 12 of 50 episodes, because the free tier allows 20 requests per day per model.
+- Cost: 42 live calls, $0. Wall time 17 min; 503 overloads accounted for most of it.
+
+Sources: `results/gemini/`, `results/compare_offline_vs_llm.json`, `failure_analysis.md` §12–19.
+
+| | Offline (heuristic) | Gemini |
+|---|---|---|
+| Candidates passing every gate | 1,243 | 2,342 (inflated LLM scores, §16) |
+| Rejected for no hook evidence in the first 3 s (code check) | 0 | 152 |
+| Shortlist size | 10 | 5 (judge budget, §18) |
+| Episodes covered by the shortlist | 1, 11, 23, 24, 27, 28, 31, 32, 36, 42+44 | 28, 29, 31, 32 |
+| Shortlist near-duplicates | 0% | 20% |
+| Cold viewer: standalone pass rate on judged candidates | 100% (proxy too lenient) | 1 of 9 by the LLM's own verdict (§17) |
+| Quotes not in the cited beat | n/a | 70 of 1,503 (7 mostly absent) |
+
+**Baseline A (LLM-only, top 10 of 12 episodes)**
+- 100% of cuts are real screenplay timestamps.
+- 80% have no line cut mid-way.
+- 90% are within 20–60 s.
+
+So an LLM alone extracts timestamps well. PROMOIQ adds guarantees (100% on all three), exhaustive search, multi-segment joins, gates and explanations.
+
+**Reading.** The LLM is a different judge, not a better-calibrated one. Its picks don't overlap the offline shortlist. It also concentrates on one arc, which is partly caused by the small judged pool. A human review of both shortlists is the only way to say which is better, and that has not been done.

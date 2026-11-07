@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 
 from src.construction.scoring import clarity, info_gap, spoilers
 from src.construction.show import Show
+from src.llm.client import LenientModel
 from src.narrative.story import retrieve_context
 from src.schemas import PromoCandidate
 
@@ -36,7 +37,7 @@ def promo_script(show: Show, p: PromoCandidate) -> str:
     return "\n".join(out)
 
 
-class ColdViewerResult(BaseModel):
+class ColdViewerResult(LenientModel):
     main_characters: list[str] = Field(default_factory=list)
     what_is_happening: str = ""
     central_conflict: str = ""
@@ -49,7 +50,7 @@ class ColdViewerResult(BaseModel):
     judge: str = "heuristic"
 
 
-class IntegrityResult(BaseModel):
+class IntegrityResult(LenientModel):
     ending_leaves_question: bool = False
     question: str = ""
     answered_inside_promo: bool = False

@@ -15,6 +15,7 @@ from collections import Counter, defaultdict
 import networkx as nx
 from pydantic import BaseModel, Field
 
+from src.llm.client import LenientModel
 from src.parser.beats import named_characters
 from src.schemas import Beat, BeatAnnotation, Episode, Event
 
@@ -248,7 +249,7 @@ def graph_to_json(G: nx.MultiDiGraph) -> dict:
     return nx.node_link_data(G, edges="edges")
 
 
-class StoryBibleLLM(BaseModel):
+class StoryBibleLLM(LenientModel):
     aliases: dict[str, str] = Field(default_factory=dict)
     relationships: list[dict] = Field(default_factory=list)
     premise: str = ""

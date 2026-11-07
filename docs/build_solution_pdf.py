@@ -25,6 +25,10 @@ ranked = json.loads((ROOT / "outputs/final/ranked_promos.json").read_text())
 bench = json.loads((ROOT / "evaluation/results/benchmark.json").read_text())
 review = json.loads((ROOT / "evaluation/results/round1/review_summary_ai_review_ratings.json").read_text())
 parse = json.loads((ROOT / "outputs/processed/parser_validation_report.json").read_text())
+cmp_path = ROOT / "evaluation/results/compare_offline_vs_llm.json"
+cmp = json.loads(cmp_path.read_text()) if cmp_path.exists() else None
+gbench_path = ROOT / "evaluation/results/gemini/benchmark.json"
+gbench = json.loads(gbench_path.read_text()) if gbench_path.exists() else None
 
 INK = colors.HexColor("#1b1b1f")
 ACC = colors.HexColor("#8a2be2")
@@ -146,13 +150,36 @@ rows.append(["  hook / cliffhanger (1-5)†"] + [f"{rv[n]['hook']:.1f} / {rv[n][
 story += [table(rows, [W * .31] + [W * .23] * len(names))]
 story += [P(
     "*Measured with PROMOIQ's own scorers, which PROMOIQ optimises, so these rows favour it partly by construction. The duration, "
-    "timestamp, mid-line and duplicate rows are objective. <b>Baseline A (LLM-only)</b> is implemented but was not run "
-    f"because no API key was available. †Blind review round 1 (on the shortlist before fix 2 below): "
+    "timestamp, mid-line and duplicate rows are objective. "
+    f"†Blind review round 1 (on the shortlist before fix 2 below): "
     f"{review['pairwise']['n']} pairs and 18 shuffled clips, rated by the AI "
     "coding assistant that built the system. It is <b>not a human or independent rating</b>, and blinding was imperfect "
     "(A0 clips are exactly 30 s and visibly cut mid-line). A human rating template is included. "
     f"Pairwise, PROMOIQ won {review['pairwise']['wins'].get('PROMOIQ', 0)}/{review['pairwise']['n']}. The reviewer and the "
     f"model's scores agreed on {review['pairwise']['reviewer_model_agreement']}.", small)]
+
+if cmp and gbench:
+    A = gbench["systems"].get("A_llm_only", {})
+    qa = cmp["quote_audit"]
+    given = qa["exact"] + qa["normalised_match"] + qa["not_in_beat"]
+    sc = cmp["beat_score_agreement"]
+    lj = cmp["llm_judges"]
+    story += [P("Live LLM run: Gemini free tier, 42 calls, $0", h2), P(
+        "Annotation used gemini-3-flash-preview, 5 episodes per call. The judges used gemini-3.1-flash-lite, a different model. "
+        "The free tier allows 20 requests per day per model, so only 9 candidates could be LLM-judged and Baseline A ran on 12 episodes. "
+        f"<b>Baseline A (LLM-only)</b> did better than I expected: {A.get('timestamps_are_source_%', 0):.0f}% of its cuts are real "
+        f"timestamps, {A.get('no_midline_cut_%', 0):.0f}% don't split a line and {A.get('duration_compliance_%', 0):.0f}% are within 20-60 s. "
+        "PROMOIQ's value is guaranteeing 100% on all three, plus search, joins, gates and explanations. "
+        f"<b>Quotes:</b> {100 * (qa['exact'] + qa['normalised_match']) / given:.1f}% of {given:,} were verbatim and "
+        f"{qa['not_in_beat']} were not, all flagged; spot checks found most of those stitched together from the beat's own words. "
+        f"<b>Scores:</b> inflated (mean stakes {sc['stakes']['llm_mean']:.1f}/5 against {sc['stakes']['offline_mean']:.1f} offline) "
+        f"and only weakly aligned with the offline scorer (rank correlation {min(v['spearman'] for v in sc.values()):.2f} to "
+        f"{max(v['spearman'] for v in sc.values()):.2f}). The code check still rejected 152 LLM-rated hooks with nothing happening "
+        "in the first 3 s. "
+        f"<b>Judges:</b> the LLM cold viewer called {lj['standalone_false']}/{lj['judged']} candidates not standalone. That confirms the offline "
+        "proxy is too lenient, but its reasons were mostly backstory a promo should withhold. "
+        f"<b>Result:</b> 5 promos from one arc (E28-32), with no overlap with the offline shortlist. A different judge, not a "
+        "better-calibrated one; only human review can settle which is better.", small)]
 
 story += [P("Where it picks badly (real failures from this build)", h2), P(
     "<b>1. Allies labelled as rivals.</b> The first conflict detector made the romantic leads the show's biggest \"conflict\" (32 events) "
@@ -165,20 +192,23 @@ story += [P("Where it picks badly (real failures from this build)", h2), P(
     "<b>4. Diversity versus preference.</b> The reviewer's preferred promo (E3 rescue, 7.83) was held back as similar (0.69) to "
     "another pick. I kept the rule rather than overfit to my own review, and now surface such alternatives. "
     "<b>5. Open issues.</b> The offline clarity proxy passes every system at 100%, so it does not discriminate. It also missed an "
-    "off-screen \"she\" that the whole promo hinges on. Both need the LLM cold-viewer judge. See evaluation/failure_analysis.md (11 cases).")]
+    "off-screen \"she\" that the whole promo hinges on; the LLM judge is stricter but muddles legibility with backstory. "
+    "See evaluation/failure_analysis.md (19 cases, including 8 from the live Gemini run).")]
 
 story += [P("Scale and cost", h2), P(
     "Offline: ~20 s per 50-episode show on one laptop CPU, with no API cost. Shows are independent, so weekly releases parallelise "
     "trivially. Continuous search is linear in cut points (~33 per episode); beam search is bounded by beam width x library size. "
-    "With an LLM, calls are batched per episode: about 50 annotation calls, 1 story-bible call over loglines only (~15 KB, not 530 KB "
-    "of scripts) and at most 30 judge calls on the strongest candidates, so ~80 calls per show. All calls are cached, logged and "
+    "With an LLM: 1 annotation call per episode (or 5 episodes per call in batched mode: 10 calls), 1 story-bible call over loglines "
+    "only (~15 KB, not 530 KB of scripts) and 2 judge calls per judged candidate. Measured free-tier run: 42 calls, 17 min (mostly "
+    "503 back-off), $0; a paid tier would judge 30+ candidates per show. All calls are cached, logged and "
     "token-counted, and a stronger judge model can be swapped in with one environment variable. "
     "Once live, I would know it works by A/B testing shortlisted promos against editor-picked ones on 3-second hold rate, completion "
     "and click-through to episode 1, and by tracking how many shortlist picks editors keep.")]
 
 story += [P("AI tools used, and one place they got it wrong", h2), P(
     "Built with <b>Claude Code (Claude Opus 5.5)</b> for code, debugging, the blind review pass and drafting this document; the decisions "
-    "and assumptions are mine to defend. The pipeline uses <b>sentence-transformers all-MiniLM-L6-v2</b> for similarity. "
+    "and assumptions are mine to defend. The pipeline uses <b>sentence-transformers all-MiniLM-L6-v2</b> for similarity and, live, "
+    "<b>Gemini</b> (3-flash-preview, 3.1-flash-lite, 3.6-flash) on the free tier. "
     "<b>Mistake:</b> the AI assistant's first conflict detector treated any two characters in a tense scene as enemies. The "
     "output looked plausible until I read the explanations against the scripts: \"conflict Alexander vs Juliana continues after "
     "the cut\" was attached to scenes where they are husband and wife. That is how I caught it. The same assistant also first set up "
@@ -188,7 +218,7 @@ story += [P("AI tools used, and one place they got it wrong", h2), P(
 story += [P("Limitations", h2), P(
     "Screenplay text only: no video frames, performance, music, edit or audience data. Cut points must be checked on the final "
     "cut. Scores are heuristic proxies, not audience predictions, and the weights are untuned hypotheses. The LLM paths are built "
-    "and mock-tested but not live-tested. The offline judges are not independent of the generator. Descriptive speaker labels "
+    "and live-tested only within free-tier limits (5-promo LLM shortlist, Baseline A on 12 episodes). The offline judges are not independent of the generator. Descriptive speaker labels "
     "(\"LADY IN GOLD GOWN\") are not resolved to names offline. Episode order is assumed to be story order. The input format is "
     "assumed to be Kuku's screenplay layout. Prototype: GitHub repo with run steps; the app is local only because the pack is confidential.")]
 

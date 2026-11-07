@@ -19,6 +19,7 @@ import re
 from pydantic import BaseModel, Field
 
 from src.dramatic import lexicon as L
+from src.llm.client import LenientModel
 from src.parser.timestamps import format_timestamp, parse_timestamp
 
 log = logging.getLogger(__name__)
@@ -81,32 +82,41 @@ def baseline_b_event_rank(show, k: int = 10, target: float = 30.0) -> list[Clip]
     return out
 
 
-class _LLMPromo(BaseModel):
+class _LLMPromo(LenientModel):
     episode: int
     segments: list[dict]
     hook: str = ""
     cliffhanger: str = ""
     why: str = ""
+    score: float = 0.0          # the model's own 0-10 rating, used to rank across episodes
 
 
-class _LLMPromos(BaseModel):
+class _LLMPromos(LenientModel):
     promos: list[_LLMPromo] = Field(default_factory=list)
 
 
-def baseline_a_llm(show, gateway, files_text: dict[int, str], k_per_ep: int = 1) -> list[Clip]:
-    """Straightforward LLM extraction. Requires a provider; returns [] otherwise."""
+def baseline_a_llm(show, gateway, files_text: dict[int, str], k_per_ep: int = 1) -> tuple[list[Clip], dict]:
+    """Straightforward LLM extraction: the raw episode script and the brief's promo definition, one
+    call per episode, no parsing help, no validation loop. Returns (clips ranked by the model's own
+    score, stats). Requires a provider."""
+    stats = {"episodes": len(files_text), "calls_failed": 0, "unparseable_timestamps": 0}
     if gateway is None:
-        return []
-    out = []
-    sys_p = "You are a promo editor. Find the best 20-60 second promo in this microdrama episode. Return JSON."
+        return [], stats
+    out: list[tuple[float, Clip]] = []
+    sys_p = ("You are a promo editor for short vertical microdramas. A promo is a 20-60 second clip from the show "
+             "(one continuous stretch or a few joined moments) that opens on a hook in the first 3 seconds, ends on a "
+             "cliffhanger, and makes sense to someone who has never seen the show. Use the screenplay's own "
+             "timestamps. Return JSON only.")
     for ep, text in sorted(files_text.items()):
-        prompt = (text[:30000] + f"\n\nReturn {{\"promos\": [{{\"episode\": {ep}, \"segments\": [{{\"start\": \"MM:SS.ss\", "
-                  "\"end\": \"MM:SS.ss\"}}], \"hook\": str, \"cliffhanger\": str, \"why\": str}}]}} with "
-                  f"{k_per_ep} promo(s).")
+        prompt = (text[:30000] + f"\n\nFind the best promo in this episode. Return {{\"promos\": [{{\"episode\": {ep}, "
+                  "\"segments\": [{\"start\": \"MM:SS.ss\", \"end\": \"MM:SS.ss\"}], \"hook\": str, "
+                  "\"cliffhanger\": str, \"why\": str, \"score\": 0-10 how strong this promo is}]} "
+                  f"with {k_per_ep} promo(s).")
         try:
             res = gateway.generate_json(f"baselineA:ep{ep}", sys_p, prompt, _LLMPromos)
         except Exception as exc:
             log.error("baseline A failed on episode %s: %s", ep, exc)
+            stats["calls_failed"] += 1
             continue
         for p in res.promos[:k_per_ep]:
             segs = []
@@ -114,7 +124,11 @@ def baseline_a_llm(show, gateway, files_text: dict[int, str], k_per_ep: int = 1)
                 try:
                     segs.append((ep, parse_timestamp(s.get("start", "")), parse_timestamp(s.get("end", ""))))
                 except Exception:
+                    stats["unparseable_timestamps"] += 1
                     segs.append((ep, -1.0, -1.0))   # keep it so the validator counts the failure
-            out.append(Clip(system="A_llm_only", clip_id=f"A-{ep:02d}", segments=segs, hook=p.hook,
-                            cliffhanger=p.cliffhanger, why=p.why))
-    return out
+            if not segs:
+                segs = [(ep, -1.0, -1.0)]
+            out.append((p.score, Clip(system="A_llm_only", clip_id=f"A-{ep:02d}", segments=segs, hook=p.hook,
+                                      cliffhanger=p.cliffhanger, why=p.why)))
+    out.sort(key=lambda x: -x[0])
+    return [c for _, c in out], stats

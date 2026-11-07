@@ -263,6 +263,37 @@ def test_extract_json_handles_fences_and_noise():
         extract_json("no json at all")
 
 
+def test_gateway_waits_on_rate_limit_and_stops_on_daily_quota(tmp_path, monkeypatch):
+    from src.llm.client import LLMClient, LLMError, ModelGateway
+    import src.llm.client as client_mod
+
+    slept = []
+    monkeypatch.setattr(client_mod.time, "sleep", lambda s: slept.append(s))
+
+    class Flaky(LLMClient):
+        provider = "fake_rl"
+        calls = 0
+
+        def _generate(self, system, prompt):
+            Flaky.calls += 1
+            if Flaky.calls == 1:
+                raise RuntimeError("429 RESOURCE_EXHAUSTED: please retry in 7s")
+            if "quota-test" in prompt:
+                raise RuntimeError("429 RESOURCE_EXHAUSTED: GenerateRequestsPerDayPerProjectPerModel")
+            return '{"ok": true}'
+
+    gw = ModelGateway(Flaky("m"), tmp_path / "c", tmp_path / "raw.jsonl")
+    gw.min_interval = 0
+    assert gw.generate("t", "s", "hello") == '{"ok": true}'
+    assert any(7 < s < 9 for s in slept)            # honoured the server's retry hint
+    with pytest.raises(LLMError, match="daily quota"):
+        gw.generate("t", "s", "quota-test")
+    n = Flaky.calls
+    with pytest.raises(LLMError, match="exhausted"):
+        gw.generate("t", "s", "another prompt")      # fails fast, no new API call
+    assert Flaky.calls == n
+
+
 def test_llm_annotator_flags_unverified_quotes_and_falls_back(episode, tmp_path):
     """Mock provider: one beat gets a fabricated quote, one beat is missing from the reply."""
     from src.dramatic.features import HeuristicAnnotator, LLMAnnotator, event_signal

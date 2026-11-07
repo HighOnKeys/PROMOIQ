@@ -114,3 +114,97 @@ The "later in the series" logic used for spoilers and information gaps relies on
 - **About 83% of the 2,124 rejections are weak cliffhangers** (1,765 candidates).
 - **Most continuous windows end on a reaction or a resolution, not a question.** The remaining rejections are weak hooks (669), spoiler risk (92), not standalone (14) and incoherent joins (5); one candidate can fail several gates.
 - **Screenplay text only.** The tool has no access to performance, music or the actual edit.
+
+---
+
+# Live Gemini run, free tier (added after the offline build)
+
+These are failures from actually running the LLM path on the full pack with a free Gemini key.
+Before this run, the LLM path had only been tested against a fake provider. Every number below
+comes from `outputs/gemini/` (private) and `evaluation/results/compare_offline_vs_llm.json`.
+
+| # | Failure | Found by | Status |
+|---|---|---|---|
+| 12 | Default model retired for new keys | Smoke test | Fixed |
+| 13 | Valid answers rejected over JSON shape | Live run | Fixed |
+| 14 | Per-minute limit misread as daily exhaustion | Live run | Fixed |
+| 15 | "No quote given" counted as an invented quote | Quote audit | Fixed |
+| 16 | LLM scores inflated and barely agree with the offline scorer | Measurement | Partly contained |
+| 17 | LLM cold viewer's verdict contradicts its own score | Judge outputs | Open |
+| 18 | Free-tier judge budget too small for a diverse shortlist | Live run | Open: limited by quota |
+| 19 | A wrong assumption: LLM-only extraction keeps real timestamps | Benchmark | Documented |
+
+## 12. Default model retired for new keys
+- **What happened.** `gemini-2.5-flash`, my default, returned **404**: "no longer available to new users". The client also retried this 404 three times, which can never help.
+- **Fix.**
+  - The default is now `gemini-3.8-flash`.
+  - `python -m src.llm.smoke` lists the models a key can see before any real run.
+  - 400/401/403/404 errors fail immediately.
+- **In the run itself,** 3.8-flash and 3.7-flash were overloaded (**503**, five back-offs on a single batch). Annotation was switched to `gemini-3-flash-preview`. Batch 1 was redone on it so all 50 episodes are scored by one model; the 3.8-flash answer stays in the raw log.
+
+## 13. Valid answers rejected over JSON shape
+- **What happened.** Gemini's first episode answer failed validation with **92 errors**. It returned `viewer_learns` and `unknown` as *lists* of sentences instead of strings (46 beats × 2 fields). The content was fine.
+- **Fix.** All LLM-facing schemas now inherit `LenientModel`. It converts list↔string and string numbers and booleans. Wrong *content* still fails.
+- The cached answer was re-validated after the fix, so no request was wasted.
+
+## 14. A per-minute limit misread as daily exhaustion
+- **What happened.** The Baseline A pre-warm stopped after 12 episodes. It reported "daily quota exhausted" and skipped 38 calls.
+- **Why it was wrong.** A probe minutes later showed `gemini-3.6-flash` still answering. My check matched the word "daily" anywhere in the error text, and my log cut the error off before Google's `quotaId`.
+- **Fix.** Only Google's `quotaId` decides now: `PerMinute` means wait 61 s, `PerDay` means stop. The quota ID is logged.
+- **The real limit,** read from a genuine per-day error: `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, **20 requests per day per model**.
+
+## 15. "No quote given" was flagged as an invented quote
+- **What happened.** After batch 1, 54 of 205 beats were flagged `[UNVERIFIED QUOTE]`. All 54 simply had an empty quote field. Every quote Gemini actually gave matched the script.
+- **Fix.** The two cases are now counted separately.
+
+**Full-run quote audit** (gemini-3-flash-preview, 1,503 quotes given):
+
+| Result | Quotes | Share |
+|---|---|---|
+| Verbatim or matching apart from punctuation | 1,433 | 95.3% |
+| Stitched or reordered from the beat's own words | 62 | — |
+| Partial match | 1 | — |
+| Mostly absent from the cited beat (invented or wrong beat) | 7 | 0.5% |
+
+All 70 quotes that aren't verbatim are flagged; none is silently trusted.
+
+## 16. LLM scores are inflated and barely agree with the offline scorer
+- **What happened.** On the 1,631 beats Gemini scored:
+
+| Feature | Offline mean (0–5) | Gemini mean (0–5) | Rank correlation |
+|---|---|---|---|
+| Stakes | 0.41 | 4.22 | 0.19 |
+| Curiosity | 0.54 | 3.37 | 0.09 |
+| Emotion | 1.23 | 3.82 | 0.36 |
+| Conflict | 1.12 | 3.07 | 0.46 (highest) |
+
+  Category labels overlap by Jaccard 0.13. With scores this high, **2,342** candidates pass the gates, against 1,243 offline. So the gates filter less.
+- **What still works.** The code validator rejected **152** candidates that the LLM rated as strong hooks but where nothing substantive happens in the first 3 seconds (`hook_evidence_first_3s`). This is the "AI interprets, code verifies" split doing its job.
+- **Proposed fix (not run, needs more quota).** Calibrate LLM scores per show, using rank or percentile instead of the raw 0–5 values, before applying the gates. Also give the model scored reference examples in the prompt.
+
+## 17. The LLM cold viewer's verdict contradicts its own score (open)
+- **What happened.** The LLM cold viewer (`gemini-3.1-flash-lite`, which sees only the promo) said **standalone = false for 8 of 9** candidates. Yet it gave most of them a clarity score of 6/10, which passes the gate of 5.
+- **Why.** Its "missing information" lists are almost all backstory, such as "why is Juliana in custody" or "the history between Juliana and Catherine". A promo is designed to withhold exactly this. The judge prompt mixes up "I can follow what is happening" with "I know the backstory".
+- **What this confirms.** The offline clarity proxy, which passes 100% of promos (§9), is far too lenient.
+- **Proposed fix.** Split the question into two: "Is the situation and conflict legible?" (a gate) and "What backstory is missing?" (information for the editor). Then gate on the first only.
+
+## 18. The free-tier judge budget is too small for a diverse shortlist (open)
+- **What happened.** With 20 requests per day, I could afford LLM judging for only **9** distinct candidates. Four failed the gates (3 not standalone, 1 spoiler), so the Gemini shortlist has **5** promos, not 10.
+- **Consequences.**
+  - All 5 come from the episode 28–32 dungeon/poison arc.
+  - 2 of the 5 are same-scene near-duplicates (near-duplicate rate 20%, against 0% offline).
+  - **None of them overlaps the offline shortlist.**
+- **What they are.** The picks are genuine high-tension scenes. The E28 one was among the offline "strong alternatives held back", and the E32 one was an offline pick in run 2.
+- **Fix.** This is a quota limit, not a code limit. With a paid tier, run 30+ judged candidates (`PROMOIQ_JUDGE_BUDGET`). Or judge more candidates per day across several days; the cache makes runs resumable.
+- **Other costs.** The judge model also hit 503 overloads, so the LLM run took **17 min** against about 20 s offline.
+
+## 19. A wrong assumption: LLM-only extraction keeps real timestamps
+- **What I assumed.** I expected Baseline A (one prompt per raw episode, no parsing help) to invent timestamps.
+- **What happened.** On 12 episodes with `gemini-3.6-flash`:
+  - **100%** of its cut points are real screenplay timestamps.
+  - It cut through a line in 2 of 10 promos, kept 9 of 10 within 20–60 s, and had 0 unparseable answers.
+- **What it means.** PROMOIQ's real advantages over a good LLM are guarantees and checks, not basic timestamp extraction:
+  - Every cut is guaranteed legal, never just usually right.
+  - It searches every window, plus multi-segment joins.
+  - It applies gates and diversity, and explains its rejections.
+- **Caveat.** Baseline A covered only 12 of 50 episodes, because the other 38 calls were lost to failure 14 and then to the quota.

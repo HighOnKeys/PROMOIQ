@@ -64,7 +64,19 @@ Every model call goes through `src/llm/client.py`, which handles:
 - **Usage counts.**
 - **Validation:** outputs are checked with pydantic. Quotes the model cites are checked against the screenplay, and unverifiable ones are flagged.
 
-**Honest status:** no API key was available while building this. All reported results come from the offline provider. The LLM paths are implemented and tested with a mock provider (`tests/test_core.py`), but have not been run against a live model.
+**Live status:** the LLM path has been run on the full pack with a free Gemini key: 42 calls, $0. See `evaluation/evaluation_report.md` and failure cases 12–19 in `evaluation/failure_analysis.md`. Free-tier keys allow about **20 requests per day per model**, so use the batched settings:
+
+```bash
+python -m src.llm.smoke     # one call: checks the key, lists the models it can use
+PROMOIQ_PROVIDER=gemini PROMOIQ_MODEL=gemini-3-flash-preview \
+PROMOIQ_JUDGE_PROVIDER=gemini PROMOIQ_JUDGE_MODEL=gemini-3.1-flash-lite PROMOIQ_JUDGE_BUDGET=9 \
+PROMOIQ_LLM_EPISODES_PER_CALL=5 python -m src.pipeline --out outputs/gemini
+```
+
+The client handles free-tier conditions:
+- **Pacing:** calls are spaced 13 s apart (`PROMOIQ_MIN_CALL_INTERVAL_S`).
+- **Waits:** it backs off on per-minute 429 and 503 errors, and stops at once on a per-day quota.
+- **Caching:** finished calls are cached, so a re-run only redoes failed calls.
 
 ## How it works
 

@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
 
 from src.dramatic import lexicon as L
+from src.llm.client import LenientModel
 from src.schemas import CATEGORIES, FEATURES, Beat, BeatAnnotation, Episode, Event, InfoGap
 
 log = logging.getLogger(__name__)
@@ -207,7 +208,7 @@ def _reason(cats, top, events, overlap) -> str:
 
 
 # ---------------------------------------------------------------- LLM annotator
-class _LLMBeat(BaseModel):
+class _LLMBeat(LenientModel):
     beat_id: str
     categories: list[str] = Field(default_factory=list)
     scores: dict[str, float] = Field(default_factory=dict)
@@ -221,7 +222,7 @@ class _LLMBeat(BaseModel):
     reasoning: str = ""
 
 
-class _LLMEpisode(BaseModel):
+class _LLMEpisode(LenientModel):
     beats: list[_LLMBeat]
 
 
@@ -271,9 +272,10 @@ class LLMAnnotator:
             for a in heur.values():
                 a.annotator = "heuristic(fallback)"
             return list(heur.values())
-        by_id = {b.beat_id: b for b in beats}
+        return self._merge(beats, heur, {r.beat_id: r for r in res.beats})
+
+    def _merge(self, beats, heur, got) -> list[BeatAnnotation]:
         out = []
-        got = {r.beat_id: r for r in res.beats if r.beat_id in by_id}
         for b in beats:
             r = got.get(b.beat_id)
             if r is None:
@@ -281,9 +283,12 @@ class LLMAnnotator:
                 a.annotator = "heuristic(missing-from-llm)"
                 out.append(a)
                 continue
-            quote_ok = bool(r.evidence_quote) and r.evidence_quote.strip('"').lower()[:60] in b.text.lower()
-            if not quote_ok:
+            # "no quote given" is not the same failure as "quote not in the source"
+            has_quote = bool(r.evidence_quote.strip().strip('"'))
+            quote_ok = has_quote and r.evidence_quote.strip('"').lower()[:60] in b.text.lower()
+            if has_quote and not quote_ok:
                 self.unverified_quotes.append({"beat_id": b.beat_id, "quote": r.evidence_quote})
+            quote_ok = quote_ok or not has_quote
             out.append(BeatAnnotation(
                 beat_id=b.beat_id,
                 categories=r.categories,
@@ -297,3 +302,71 @@ class LLMAnnotator:
                 annotator=self.name,
             ))
         return out
+
+    def annotate_batch(self, items, events, signals) -> list[BeatAnnotation]:
+        """Annotate several episodes in one call (free-tier friendly). items: [(ep, beats, prev_logline)]."""
+        heur = {}
+        for ep, beats, _ in items:
+            heur.update({a.beat_id: a for a in self.fallback.annotate_episode(ep, beats, events, signals)})
+        tag = "-".join(str(ep.episode) for ep, _, _ in items)
+        try:
+            res = self.gw.generate_json(f"annotate_batch:ep{tag}", ANNOTATE_SYSTEM, batch_prompt(items), _CompactBatch)
+            got = {}
+            for row in res.beats:
+                r = _row_to_beat(row)
+                if r is not None:
+                    got[r.beat_id] = r
+        except Exception as exc:
+            log.error("LLM batch annotation failed for episodes %s, using heuristic: %s", tag, exc)
+            got = {}
+        out = []
+        for ep, beats, _ in items:
+            if not got:
+                for b in beats:
+                    heur[b.beat_id].annotator = "heuristic(fallback)"
+                    out.append(heur[b.beat_id])
+            else:
+                out.extend(self._merge(beats, heur, got))
+        return out
+
+
+# ---------------------------------------------------------------- batched (free-tier) mode
+class _CompactBatch(LenientModel):
+    beats: list[list] = Field(default_factory=list)
+
+
+def batch_prompt(items) -> str:
+    """items: [(episode, beats, prev_logline)]. Compact array output keeps ~5 episodes in one call."""
+    lines = []
+    for ep, beats, prev in items:
+        lines += [f"=== EPISODE {ep.episode} ===", f"PREVIOUS EPISODE LOGLINE: {prev or 'n/a'}",
+                  f"LOGLINE: {ep.logline}", f"CONTINUITY: {ep.continuity}", "BEATS (id | start-end s | content):"]
+        lines += [f"{b.beat_id} | {b.start:.1f}-{b.end:.1f} | {b.text[:450]}" for b in beats]
+        lines.append("")
+    lines += [
+        "Score EVERY beat above. Return {\"beats\": [ROW, ROW, ...]} where each ROW is a JSON array:",
+        f"[beat_id, {', '.join(FEATURES)}, hook_signal, cliff_signal, resolution_signal, "
+        "\"comma-separated labels\", \"open question a viewer is left with (<=12 words, or empty)\", "
+        "\"exact quote from the beat (<=8 words)\"]",
+        "All scores are integers 0-5 (0 none ... 5 exceptional). hook_signal: would this beat's first 3 seconds stop a "
+        "scroller? cliff_signal: if a promo cut right after this beat, how strong is the unanswered question? "
+        f"resolution_signal: does it close tension? Allowed labels: {', '.join(CATEGORIES)}.",
+    ]
+    return "\n".join(lines)
+
+
+def _row_to_beat(row) -> "_LLMBeat | None":
+    if not isinstance(row, list) or len(row) < 12:
+        return None
+    def num(x):
+        try:
+            return float(x)
+        except (TypeError, ValueError):
+            return 0.0
+    cats = row[12] if len(row) > 12 else ""
+    cats = cats if isinstance(cats, list) else [c.strip() for c in str(cats).split(",") if c.strip()]
+    return _LLMBeat(beat_id=str(row[0]), categories=cats,
+                    scores={k: num(v) for k, v in zip(FEATURES, row[1:9])},
+                    hook_signal=num(row[9]), cliff_signal=num(row[10]), resolution_signal=num(row[11]),
+                    question=str(row[13]) if len(row) > 13 else "",
+                    evidence_quote=str(row[14]) if len(row) > 14 else "", reasoning="batched compact mode")

@@ -1,0 +1,886 @@
+{
+  "baseline_A_llm_only": "ran with gemini:gemini-3.6-flash: 12 promos from 12 episodes, 0 failed calls, 0 unparseable timestamps",
+  "systems": {
+    "PROMOIQ": {
+      "n": 5,
+      "duration_compliance_%": 100.0,
+      "timestamps_are_source_%": 100.0,
+      "no_midline_cut_%": 100.0,
+      "hook_pass_%": 100.0,
+      "cliffhanger_pass_%": 100.0,
+      "standalone_pass_%": 100.0,
+      "mean_hook": 9.34,
+      "mean_cliff": 9.76,
+      "mean_clarity": 8.74,
+      "mean_coherence": 9.2,
+      "spoiler_flag_%": 0.0,
+      "near_duplicate_%": 20.0,
+      "processing_s": 11.94,
+      "model_calls": 0,
+      "approx_cost_usd": 0.0
+    },
+    "A0_keyword_window": {
+      "n": 10,
+      "duration_compliance_%": 100.0,
+      "timestamps_are_source_%": 0.0,
+      "no_midline_cut_%": 10.0,
+      "hook_pass_%": 40.0,
+      "cliffhanger_pass_%": 70.0,
+      "standalone_pass_%": 100.0,
+      "mean_hook": 3.44,
+      "mean_cliff": 6.86,
+      "mean_clarity": 8.14,
+      "mean_coherence": 9.0,
+      "spoiler_flag_%": 20.0,
+      "near_duplicate_%": 20.0,
+      "processing_s": 0.02,
+      "model_calls": 0,
+      "approx_cost_usd": 0.0
+    },
+    "B_event_rank": {
+      "n": 10,
+      "duration_compliance_%": 60.0,
+      "timestamps_are_source_%": 100.0,
+      "no_midline_cut_%": 100.0,
+      "hook_pass_%": 90.0,
+      "cliffhanger_pass_%": 100.0,
+      "standalone_pass_%": 100.0,
+      "mean_hook": 7.37,
+      "mean_cliff": 8.27,
+      "mean_clarity": 8.05,
+      "mean_coherence": 9.0,
+      "spoiler_flag_%": 0.0,
+      "near_duplicate_%": 30.0,
+      "processing_s": 0.0,
+      "model_calls": 0,
+      "approx_cost_usd": 0.0
+    },
+    "A_llm_only": {
+      "n": 10,
+      "duration_compliance_%": 90.0,
+      "timestamps_are_source_%": 100.0,
+      "no_midline_cut_%": 80.0,
+      "hook_pass_%": 80.0,
+      "cliffhanger_pass_%": 70.0,
+      "standalone_pass_%": 100.0,
+      "mean_hook": 6.55,
+      "mean_cliff": 7.3,
+      "mean_clarity": 8.29,
+      "mean_coherence": 8.9,
+      "spoiler_flag_%": 0.0,
+      "near_duplicate_%": 0.0,
+      "processing_s": 0.0,
+      "model_calls": 0,
+      "approx_cost_usd": 0.0
+    }
+  },
+  "per_clip": {
+    "PROMOIQ": [
+      {
+        "clip_id": "PROMO-01",
+        "system": "PROMOIQ",
+        "duration": 30.7,
+        "segments": [
+          [
+            28,
+            70.5,
+            101.2
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 9.83,
+        "cliff": 9.3,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-02",
+        "system": "PROMOIQ",
+        "duration": 28.78,
+        "segments": [
+          [
+            32,
+            119.5,
+            140.4
+          ],
+          [
+            32,
+            146.5,
+            154.38
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 10.0,
+        "cliff": 10.0,
+        "clarity": 7.7,
+        "coherence": 10.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-03",
+        "system": "PROMOIQ",
+        "duration": 29.2,
+        "segments": [
+          [
+            31,
+            130.8,
+            160.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 9.2,
+        "cliff": 9.6,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-04",
+        "system": "PROMOIQ",
+        "duration": 25.5,
+        "segments": [
+          [
+            28,
+            113.0,
+            138.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 9.2,
+        "cliff": 10.0,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-05",
+        "system": "PROMOIQ",
+        "duration": 26.8,
+        "segments": [
+          [
+            29,
+            13.2,
+            40.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.46,
+        "cliff": 9.9,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      }
+    ],
+    "A0_keyword_window": [
+      {
+        "clip_id": "A0-01",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            21,
+            18.4,
+            48.4
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 2,
+        "hook": 0.0,
+        "cliff": 3.65,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-02",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            29,
+            0.25,
+            30.25
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 4.53,
+        "cliff": 4.27,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-03",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            30,
+            21.7,
+            51.7
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 2,
+        "hook": 0.0,
+        "cliff": 6.88,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-04",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            30,
+            83.2,
+            113.2
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 3.34,
+        "cliff": 6.88,
+        "clarity": 7.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-05",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            32,
+            105.7,
+            135.7
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 2,
+        "hook": 5.57,
+        "cliff": 6.92,
+        "clarity": 7.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-06",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            42,
+            4.6,
+            34.6
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 0.0,
+        "cliff": 7.08,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 8.5
+      },
+      {
+        "clip_id": "A0-07",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            42,
+            47.8,
+            77.8
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 6.07,
+        "cliff": 9.6,
+        "clarity": 8.4,
+        "coherence": 9.0,
+        "spoiler": 1.0
+      },
+      {
+        "clip_id": "A0-08",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            46,
+            113.88,
+            143.88
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 0.0,
+        "cliff": 9.39,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 4.0
+      },
+      {
+        "clip_id": "A0-09",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            3,
+            44.15,
+            74.15
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 2,
+        "hook": 7.7,
+        "cliff": 10.0,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A0-10",
+        "system": "A0_keyword_window",
+        "duration": 30.0,
+        "segments": [
+          [
+            9,
+            0.0,
+            30.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": false,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 7.17,
+        "cliff": 3.96,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      }
+    ],
+    "B_event_rank": [
+      {
+        "clip_id": "B-01",
+        "system": "B_event_rank",
+        "duration": 33.4,
+        "segments": [
+          [
+            1,
+            39.0,
+            72.4
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 6.53,
+        "cliff": 6.18,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-02",
+        "system": "B_event_rank",
+        "duration": 30.6,
+        "segments": [
+          [
+            1,
+            107.4,
+            138.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 4.0,
+        "cliff": 9.39,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-03",
+        "system": "B_event_rank",
+        "duration": 16.8,
+        "segments": [
+          [
+            2,
+            93.2,
+            110.0
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 5.33,
+        "cliff": 9.39,
+        "clarity": 7.5,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-04",
+        "system": "B_event_rank",
+        "duration": 31.7,
+        "segments": [
+          [
+            3,
+            60.0,
+            91.7
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 10.0,
+        "cliff": 7.59,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-05",
+        "system": "B_event_rank",
+        "duration": 13.05,
+        "segments": [
+          [
+            3,
+            132.7,
+            145.75
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.68,
+        "cliff": 9.18,
+        "clarity": 6.5,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-06",
+        "system": "B_event_rank",
+        "duration": 19.9,
+        "segments": [
+          [
+            4,
+            131.5,
+            151.4
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 9.25,
+        "cliff": 9.39,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-07",
+        "system": "B_event_rank",
+        "duration": 31.0,
+        "segments": [
+          [
+            5,
+            20.8,
+            51.8
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 5.33,
+        "cliff": 6.18,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-08",
+        "system": "B_event_rank",
+        "duration": 31.5,
+        "segments": [
+          [
+            5,
+            54.0,
+            85.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.66,
+        "cliff": 5.38,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-09",
+        "system": "B_event_rank",
+        "duration": 19.55,
+        "segments": [
+          [
+            11,
+            93.2,
+            112.75
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.87,
+        "cliff": 10.0,
+        "clarity": 6.5,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "B-10",
+        "system": "B_event_rank",
+        "duration": 30.41,
+        "segments": [
+          [
+            12,
+            56.8,
+            87.21
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.02,
+        "cliff": 10.0,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      }
+    ],
+    "A_llm_only": [
+      {
+        "clip_id": "A-03",
+        "system": "A_llm_only",
+        "duration": 85.75,
+        "segments": [
+          [
+            3,
+            60.0,
+            145.75
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 10.0,
+        "cliff": 9.18,
+        "clarity": 6.8,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-04",
+        "system": "A_llm_only",
+        "duration": 40.0,
+        "segments": [
+          [
+            4,
+            94.8,
+            134.8
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 5.18,
+        "cliff": 6.2,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-05",
+        "system": "A_llm_only",
+        "duration": 59.3,
+        "segments": [
+          [
+            5,
+            41.5,
+            100.8
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.5,
+        "cliff": 7.19,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-01",
+        "system": "A_llm_only",
+        "duration": 45.3,
+        "segments": [
+          [
+            1,
+            33.7,
+            79.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 5.23,
+        "cliff": 7.08,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-02",
+        "system": "A_llm_only",
+        "duration": 40.7,
+        "segments": [
+          [
+            2,
+            69.3,
+            110.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.3,
+        "cliff": 9.39,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-11",
+        "system": "A_llm_only",
+        "duration": 59.75,
+        "segments": [
+          [
+            11,
+            16.8,
+            53.6
+          ],
+          [
+            11,
+            89.8,
+            112.75
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 8.5,
+        "cliff": 10.0,
+        "clarity": 8.1,
+        "coherence": 8.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-12",
+        "system": "A_llm_only",
+        "duration": 43.21,
+        "segments": [
+          [
+            12,
+            44.0,
+            87.21
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.1,
+        "cliff": 10.0,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-07",
+        "system": "A_llm_only",
+        "duration": 36.7,
+        "segments": [
+          [
+            7,
+            54.8,
+            91.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 1.92,
+        "cliff": 4.42,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-10",
+        "system": "A_llm_only",
+        "duration": 37.1,
+        "segments": [
+          [
+            10,
+            2.1,
+            39.2
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.39,
+        "cliff": 4.89,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-06",
+        "system": "A_llm_only",
+        "duration": 39.3,
+        "segments": [
+          [
+            6,
+            7.1,
+            46.4
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": false,
+        "midline_cuts": 1,
+        "hook": 4.38,
+        "cliff": 4.68,
+        "clarity": 8.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      }
+    ]
+  },
+  "baseline_A_all_episodes": {
+    "n": 12,
+    "duration_compliance_%": 91.7,
+    "timestamps_are_source_%": 100.0,
+    "no_midline_cut_%": 83.3,
+    "hook_pass_%": 66.7,
+    "cliffhanger_pass_%": 75.0,
+    "standalone_pass_%": 100.0,
+    "mean_hook": 6.04,
+    "mean_cliff": 7.34,
+    "mean_clarity": 8.33,
+    "mean_coherence": 8.92,
+    "spoiler_flag_%": 0.0,
+    "near_duplicate_%": 0.0,
+    "processing_s": 0.0,
+    "model_calls": 0,
+    "approx_cost_usd": 0.0,
+    "note": "all promos the LLM returned (one per episode), not just its top 10"
+  }
+}

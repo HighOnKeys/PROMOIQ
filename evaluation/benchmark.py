@@ -125,12 +125,23 @@ def clip_script(show, clip: Clip) -> str:
 
 
 def main():
+    global RES, PRIV
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", type=Path, default=None, help="pipeline output root (default outputs/)")
+    ap.add_argument("--tag", default="", help="write results to evaluation/results/<tag>/")
+    a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     st = get_settings()
+    if a.tag:
+        RES = RES / a.tag
+    if a.out:
+        PRIV = Path(a.out) / "evaluation"
     RES.mkdir(parents=True, exist_ok=True)
     PRIV.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    res = run(settings=st)
+    res = run(settings=st, out_root=a.out)
     t_promoiq = time.time() - t0
     show = res["show"]
     times = source_times(show)
@@ -148,17 +159,28 @@ def main():
     systems["A0_keyword_window"] = (baseline_a0_keyword(show), time.time() - t, 0)
     t = time.time()
     systems["B_event_rank"] = (baseline_b_event_rank(show), time.time() - t, 0)
-    gw = make_gateway(st.model.provider, st.model.model, st.model.cache_dir, st.paths.raw / "llm_responses.jsonl")
+    import os
+    # Baseline A can use its own model and a capped number of episodes (free tiers allow ~20 requests/day/model)
+    a_model = os.environ.get("PROMOIQ_BASELINE_MODEL", st.model.model)
+    a_eps = int(os.environ.get("PROMOIQ_BASELINE_A_EPISODES", "0") or 0)
+    gw = make_gateway(st.model.provider, a_model, st.model.cache_dir, st.paths.raw / "llm_responses.jsonl")
     a_status = "not run: no LLM provider configured (set PROMOIQ_PROVIDER and an API key)"
     if gw is not None:
         from src.parser import find_episode_files
         texts = {i + 1: p.read_text() for i, p in enumerate(find_episode_files(st.paths.input_dir))}
+        if a_eps:
+            texts = {k: v for k, v in texts.items() if k <= a_eps}
         t = time.time()
-        clips = baseline_a_llm(show, gw, texts)
+        clips, a_stats = baseline_a_llm(show, gw, texts)
         systems["A_llm_only"] = (clips[:10], time.time() - t, gw.usage.calls)
-        a_status = f"ran with {gw.name}"
+        a_status = f"ran with {gw.name}: {len(clips)} promos from {a_stats['episodes']} episodes, " \
+                   f"{a_stats['calls_failed']} failed calls, {a_stats['unparseable_timestamps']} unparseable timestamps"
+        a_all = [clip_metrics(show, c, times, blockers, st) for c in clips]
 
     report = {"baseline_A_llm_only": a_status, "systems": {}, "per_clip": {}}
+    if gw is not None:
+        report["baseline_A_all_episodes"] = aggregate(show, clips, a_all, systems["A_llm_only"][1], gw.usage.calls, st)
+        report["baseline_A_all_episodes"]["note"] = "all promos the LLM returned (one per episode), not just its top 10"
     for name, (clips, secs, calls) in systems.items():
         ms = [clip_metrics(show, c, times, blockers, st) for c in clips]
         report["systems"][name] = aggregate(show, clips, ms, secs, calls, st)
@@ -180,6 +202,9 @@ def main():
     rng = random.Random(st.search.seed)
     pool = ([(c, "PROMOIQ") for c in promo[:8]] + [(c, "B_event_rank") for c in systems["B_event_rank"][0][:5]]
             + [(c, "A0_keyword_window") for c in systems["A0_keyword_window"][0][:5]])
+    if "A_llm_only" in systems:
+        ok = [m["clip_id"] for m in report["per_clip"]["A_llm_only"] if m.get("valid_refs")]
+        pool += [(c, "A_llm_only") for c in systems["A_llm_only"][0] if c.clip_id in ok][:5]
     rng.shuffle(pool)
     key, sheet = {}, ["# Blind promo review sheet", "",
                       "Rate each clip 1-5 on: Hook (first 3 s), Cliffhanger, Standalone clarity, Emotional appeal, "

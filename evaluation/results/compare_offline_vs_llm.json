@@ -1,0 +1,252 @@
+{
+  "beats": 1633,
+  "llm_annotated_beats": 1631,
+  "annotation_sources": {
+    "gemini:gemini-3-flash-preview": 1631,
+    "heuristic(missing-from-llm)": 2
+  },
+  "beat_score_agreement": {
+    "surprise": {
+      "spearman": 0.185,
+      "p": 4.7e-14,
+      "offline_mean": 0.36,
+      "llm_mean": 1.71
+    },
+    "emotional_intensity": {
+      "spearman": 0.358,
+      "p": 1.5e-50,
+      "offline_mean": 1.23,
+      "llm_mean": 3.82
+    },
+    "conflict_intensity": {
+      "spearman": 0.461,
+      "p": 1.9e-86,
+      "offline_mean": 1.12,
+      "llm_mean": 3.07
+    },
+    "stakes": {
+      "spearman": 0.194,
+      "p": 3.1e-15,
+      "offline_mean": 0.41,
+      "llm_mean": 4.22
+    },
+    "reveal_value": {
+      "spearman": 0.178,
+      "p": 4.5e-13,
+      "offline_mean": 0.22,
+      "llm_mean": 1.56
+    },
+    "visual_potential": {
+      "spearman": 0.352,
+      "p": 9.7e-49,
+      "offline_mean": 0.64,
+      "llm_mean": 3.73
+    },
+    "curiosity": {
+      "spearman": 0.089,
+      "p": 0.00034,
+      "offline_mean": 0.54,
+      "llm_mean": 3.37
+    },
+    "narrative_importance": {
+      "spearman": 0.323,
+      "p": 5.7e-41,
+      "offline_mean": 2.33,
+      "llm_mean": 3.63
+    },
+    "hook_signal": {
+      "spearman": 0.268,
+      "p": 3.2e-28,
+      "offline_mean": 1.94,
+      "llm_mean": 3.37
+    },
+    "cliff_signal": {
+      "spearman": 0.186,
+      "p": 3.7e-14,
+      "offline_mean": 1.41,
+      "llm_mean": 1.66
+    }
+  },
+  "category_jaccard_mean": 0.134,
+  "quote_audit": {
+    "exact": 1353,
+    "normalised_match": 80,
+    "not_in_beat": 70,
+    "no_quote_given": 333,
+    "examples_not_in_beat": [
+      "B001-045",
+      "B003-021",
+      "B003-040",
+      "B003-046",
+      "B004-034"
+    ]
+  },
+  "run": {
+    "validated": {
+      "offline": 1243,
+      "llm": 2342
+    },
+    "rejected": {
+      "offline": 2124,
+      "llm": 1039
+    },
+    "reject_reasons": {
+      "offline": {
+        "weak cliffhanger": 1765,
+        "weak hook": 669,
+        "spoiler risk": 92,
+        "not standalone": 14,
+        "incoherent multi-segment join": 5
+      },
+      "llm": {
+        "weak hook": 601,
+        "weak cliffhanger": 305,
+        "spoiler risk": 152,
+        "hard:hook_evidence_first_3s": 152,
+        "incoherent multi-segment join": 21,
+        "not standalone": 7
+      }
+    },
+    "total_s": {
+      "offline": 21.5,
+      "llm": 11.93
+    },
+    "models": {
+      "offline": {
+        "generator": "heuristic",
+        "judge": "heuristic",
+        "embeddings": "sentence-transformers:all-MiniLM-L6-v2"
+      },
+      "llm": {
+        "generator": "gemini:gemini-3-flash-preview",
+        "judge": "gemini:gemini-3.1-flash-lite",
+        "embeddings": "sentence-transformers:all-MiniLM-L6-v2"
+      }
+    },
+    "llm_judging": {
+      "offline": null,
+      "llm": {
+        "budget": 9,
+        "selected": 9,
+        "judged_ok": 9,
+        "ranking_pool": 5
+      }
+    }
+  },
+  "llm_usage": {
+    "generator": {
+      "calls": 0,
+      "cache_hits": 11,
+      "failures": 0,
+      "approx_input_tokens": 0,
+      "approx_output_tokens": 0,
+      "seconds": 0.0,
+      "by_task": {}
+    },
+    "judge": {
+      "calls": 0,
+      "cache_hits": 18,
+      "failures": 0,
+      "approx_input_tokens": 0,
+      "approx_output_tokens": 0,
+      "seconds": 0.0,
+      "by_task": {}
+    }
+  },
+  "shortlist_overlap": {
+    "llm_promos_matching_an_offline_pick": 0,
+    "of": 5,
+    "detail": [
+      {
+        "llm_promo": "PROMO-01",
+        "episodes": [
+          28
+        ],
+        "theme": "mystery",
+        "best_offline_match": null,
+        "overlap": 0.16
+      },
+      {
+        "llm_promo": "PROMO-02",
+        "episodes": [
+          32
+        ],
+        "theme": "confrontation",
+        "best_offline_match": null,
+        "overlap": 0.11
+      },
+      {
+        "llm_promo": "PROMO-03",
+        "episodes": [
+          31
+        ],
+        "theme": "action",
+        "best_offline_match": null,
+        "overlap": 0.0
+      },
+      {
+        "llm_promo": "PROMO-04",
+        "episodes": [
+          28
+        ],
+        "theme": "action",
+        "best_offline_match": null,
+        "overlap": 0.0
+      },
+      {
+        "llm_promo": "PROMO-05",
+        "episodes": [
+          29
+        ],
+        "theme": "confrontation",
+        "best_offline_match": null,
+        "overlap": 0.0
+      }
+    ],
+    "episodes_offline": [
+      1,
+      11,
+      23,
+      24,
+      27,
+      28,
+      31,
+      32,
+      36,
+      42,
+      44
+    ],
+    "episodes_llm": [
+      28,
+      29,
+      31,
+      32
+    ]
+  },
+  "llm_judges": {
+    "judged": 9,
+    "standalone_false": 8,
+    "mean_llm_clarity": 5.56,
+    "answered_inside_promo": 0,
+    "not_faithful_to_source": 0,
+    "rejected_after_llm_judging": 4,
+    "gate_failures": {
+      "not standalone": 3,
+      "spoiler risk 7.0": 1
+    },
+    "example_missing_information": [
+      "The nature of their relationship",
+      "The reason for Juliana's imprisonment",
+      "The context of the 'branding' and what it represents in this world",
+      "The identity of Catherine",
+      "The relationship between Juliana and the Duchess",
+      "Why the Duchess believes Juliana is innocent",
+      "The specific nature of the relationship between Rupert and Catherine",
+      "The nature of the relationship between Catherine and Juliana",
+      "Why Juliana is being taken to the gallows",
+      "The significance of the 'witch' label",
+      "The history behind the locket and the book",
+      "The nature of the past relationship between Juliana and Gerald"
+    ]
+  }
+}

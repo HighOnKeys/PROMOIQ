@@ -94,6 +94,10 @@ class ModelConfig:
     judge_model: str = field(default_factory=lambda: _env("PROMOIQ_JUDGE_MODEL", ""))
     temperature: float = 0.2
     max_retries: int = 2
+    # LLM judges are spent only on this many DISTINCT strong candidates (2 calls each)
+    judge_budget: int = field(default_factory=lambda: int(_env("PROMOIQ_JUDGE_BUDGET", "30")))
+    # >1 batches several episodes into one compact annotation call (free tiers allow ~20 requests/day/model)
+    episodes_per_call: int = field(default_factory=lambda: int(_env("PROMOIQ_LLM_EPISODES_PER_CALL", "1")))
     cache_dir: Path = ROOT / "outputs" / "raw" / "llm_cache"
 
 
