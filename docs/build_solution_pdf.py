@@ -164,11 +164,11 @@ if cmp and gbench:
     given = qa["exact"] + qa["normalised_match"] + qa["not_in_beat"]
     sc = cmp["beat_score_agreement"]
     lj = cmp["llm_judges"]
-    story += [P("Live LLM run: Gemini free tier, 42 calls, $0", h2), P(
+    story += [P("Live LLM run: Gemini free tier, 80 calls over two days, $0", h2), P(
         "Annotation used gemini-3-flash-preview, 5 episodes per call. The judges used gemini-3.1-flash-lite, a different model. "
-        "The free tier allows 20 requests per day per model, so only 9 candidates could be LLM-judged and Baseline A ran on 12 episodes. "
+        "The free tier allows 20 requests per day per model, so over two days (cached answers reused) 19 candidates were LLM-judged and Baseline A covered 28 episodes. "
         f"<b>Baseline A (LLM-only)</b> did better than I expected: {A.get('timestamps_are_source_%', 0):.0f}% of its cuts are real "
-        f"timestamps, {A.get('no_midline_cut_%', 0):.0f}% don't split a line and {A.get('duration_compliance_%', 0):.0f}% are within 20-60 s. "
+        f"timestamps and {A.get('no_midline_cut_%', 0):.0f}% don't split a line, but only {A.get('duration_compliance_%', 0):.0f}% of its top 10 are within 20-60 s (5 run 61-86 s). "
         "PROMOIQ's value is guaranteeing 100% on all three, plus search, joins, gates and explanations. "
         f"<b>Quotes:</b> {100 * (qa['exact'] + qa['normalised_match']) / given:.1f}% of {given:,} were verbatim and "
         f"{qa['not_in_beat']} were not, all flagged; spot checks found most of those stitched together from the beat's own words. "
@@ -178,7 +178,8 @@ if cmp and gbench:
         "in the first 3 s. "
         f"<b>Judges:</b> the LLM cold viewer called {lj['standalone_false']}/{lj['judged']} candidates not standalone. That confirms the offline "
         "proxy is too lenient, but its reasons were mostly backstory a promo should withhold. "
-        f"<b>Result:</b> 5 promos from one arc (E28-32), with no overlap with the offline shortlist. A different judge, not a "
+        f"<b>Result:</b> 10 promos from 10 episodes, with no near-duplicates; one is the offline #1 (E27). Day 1's 9 judged candidates had "
+        "given 5 promos from one arc, so the narrowness came from the small pool. A different judge, not a "
         "better-calibrated one; only human review can settle which is better.", small)]
 
 story += [P("Where it picks badly (real failures from this build)", h2), P(
@@ -199,8 +200,8 @@ story += [P("Scale and cost", h2), P(
     "Offline: ~20 s per 50-episode show on one laptop CPU, with no API cost. Shows are independent, so weekly releases parallelise "
     "trivially. Continuous search is linear in cut points (~33 per episode); beam search is bounded by beam width x library size. "
     "With an LLM: 1 annotation call per episode (or 5 episodes per call in batched mode: 10 calls), 1 story-bible call over loglines "
-    "only (~15 KB, not 530 KB of scripts) and 2 judge calls per judged candidate. Measured free-tier run: 42 calls, 17 min (mostly "
-    "503 back-off), $0; a paid tier would judge 30+ candidates per show. All calls are cached, logged and "
+    "only (~15 KB, not 530 KB of scripts) and 2 judge calls per judged candidate. Measured free-tier run: 80 calls, 35 min over two "
+    "days (mostly pacing and 503 back-off), $0; a paid tier would judge 30+ candidates per show in one pass. All calls are cached, logged and "
     "token-counted, and a stronger judge model can be swapped in with one environment variable. "
     "Once live, I would know it works by A/B testing shortlisted promos against editor-picked ones on 3-second hold rate, completion "
     "and click-through to episode 1, and by tracking how many shortlist picks editors keep.")]
@@ -218,7 +219,7 @@ story += [P("AI tools used, and one place they got it wrong", h2), P(
 story += [P("Limitations", h2), P(
     "Screenplay text only: no video frames, performance, music, edit or audience data. Cut points must be checked on the final "
     "cut. Scores are heuristic proxies, not audience predictions, and the weights are untuned hypotheses. The LLM paths are built "
-    "and live-tested only within free-tier limits (5-promo LLM shortlist, Baseline A on 12 episodes). The offline judges are not independent of the generator. Descriptive speaker labels "
+    "and live-tested only within free-tier limits (19 LLM-judged candidates, Baseline A on 28 of 50 episodes). The offline judges are not independent of the generator. Descriptive speaker labels "
     "(\"LADY IN GOLD GOWN\") are not resolved to names offline. Episode order is assumed to be story order. The input format is "
     "assumed to be Kuku's screenplay layout. Prototype: GitHub repo with run steps; the app is local only because the pack is confidential.")]
 

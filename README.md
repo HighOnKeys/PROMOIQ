@@ -26,7 +26,7 @@ pip install -r requirements.txt
    ```
 3. Run the tests:
    ```bash
-   python -m pytest -q                         # 30 tests (synthetic fixtures, no Kuku content)
+   python -m pytest -q                         # 31 tests (synthetic fixtures, no Kuku content)
    ```
 4. Compare against the baselines and build the blind review sheets:
    ```bash
@@ -64,7 +64,7 @@ Every model call goes through `src/llm/client.py`, which handles:
 - **Usage counts.**
 - **Validation:** outputs are checked with pydantic. Quotes the model cites are checked against the screenplay, and unverifiable ones are flagged.
 
-**Live status:** the LLM path has been run on the full pack with a free Gemini key: 42 calls, $0. See `evaluation/evaluation_report.md` and failure cases 12–19 in `evaluation/failure_analysis.md`. Free-tier keys allow about **20 requests per day per model**, so use the batched settings:
+**Live status:** the LLM path has been run on the full pack with a free Gemini key: 80 calls over two days, $0. This covers 19 LLM-judged candidates, a 10-promo Gemini shortlist, and Baseline A on 28 episodes. See `evaluation/evaluation_report.md` and failure cases 12–19 in `evaluation/failure_analysis.md`. Free-tier keys allow about **20 requests per day per model**, so use the batched settings:
 
 ```bash
 python -m src.llm.smoke     # one call: checks the key, lists the models it can use
@@ -72,6 +72,8 @@ PROMOIQ_PROVIDER=gemini PROMOIQ_MODEL=gemini-3-flash-preview \
 PROMOIQ_JUDGE_PROVIDER=gemini PROMOIQ_JUDGE_MODEL=gemini-3.1-flash-lite PROMOIQ_JUDGE_BUDGET=9 \
 PROMOIQ_LLM_EPISODES_PER_CALL=5 python -m src.pipeline --out outputs/gemini
 ```
+
+That is the day-1 command. On the next day, raise `PROMOIQ_JUDGE_BUDGET` (it was 19 on day 2). Cached answers are reused, so only the new candidates cost calls.
 
 The client handles free-tier conditions:
 - **Pacing:** calls are spaced 13 s apart (`PROMOIQ_MIN_CALL_INTERVAL_S`).
@@ -130,7 +132,7 @@ The benchmark compares the systems on one set of metrics. Results are in `evalua
 - **PROMOIQ.**
 - **A0:** a keyword-density fixed window, with no AI.
 - **B:** independent event ranking, using PROMOIQ's own features but no sequence reasoning.
-- **A:** LLM-only extraction. Implemented, but not run because no API key was available.
+- **A:** LLM-only extraction, run on Gemini for 28 of 50 episodes (`evaluation/results/gemini/`).
 
 Blind review round 1 (18 clips, 6 pairs) was rated by the AI coding assistant. It is **not** a human rating, and the reviewer built the system. See `evaluation/human_eval/` for a template to collect human ratings. Failures and fixes are in `evaluation/failure_analysis.md`.
 

@@ -1,21 +1,21 @@
 {
-  "baseline_A_llm_only": "ran with gemini:gemini-3.6-flash: 12 promos from 12 episodes, 0 failed calls, 0 unparseable timestamps",
+  "baseline_A_llm_only": "ran with gemini:gemini-3.6-flash: 28 promos from 32 episodes, 4 failed calls, 0 unparseable timestamps",
   "systems": {
     "PROMOIQ": {
-      "n": 5,
+      "n": 10,
       "duration_compliance_%": 100.0,
       "timestamps_are_source_%": 100.0,
       "no_midline_cut_%": 100.0,
       "hook_pass_%": 100.0,
       "cliffhanger_pass_%": 100.0,
       "standalone_pass_%": 100.0,
-      "mean_hook": 9.34,
-      "mean_cliff": 9.76,
-      "mean_clarity": 8.74,
-      "mean_coherence": 9.2,
+      "mean_hook": 8.6,
+      "mean_cliff": 9.69,
+      "mean_clarity": 8.75,
+      "mean_coherence": 9.1,
       "spoiler_flag_%": 0.0,
-      "near_duplicate_%": 20.0,
-      "processing_s": 11.94,
+      "near_duplicate_%": 0.0,
+      "processing_s": 767.09,
       "model_calls": 0,
       "approx_cost_usd": 0.0
     },
@@ -57,21 +57,21 @@
     },
     "A_llm_only": {
       "n": 10,
-      "duration_compliance_%": 90.0,
+      "duration_compliance_%": 50.0,
       "timestamps_are_source_%": 100.0,
-      "no_midline_cut_%": 80.0,
+      "no_midline_cut_%": 100.0,
       "hook_pass_%": 80.0,
-      "cliffhanger_pass_%": 70.0,
+      "cliffhanger_pass_%": 90.0,
       "standalone_pass_%": 100.0,
-      "mean_hook": 6.55,
-      "mean_cliff": 7.3,
-      "mean_clarity": 8.29,
-      "mean_coherence": 8.9,
+      "mean_hook": 6.88,
+      "mean_cliff": 8.58,
+      "mean_clarity": 8.2,
+      "mean_coherence": 9.0,
       "spoiler_flag_%": 0.0,
       "near_duplicate_%": 0.0,
-      "processing_s": 0.0,
-      "model_calls": 0,
-      "approx_cost_usd": 0.0
+      "processing_s": 299.07,
+      "model_calls": 17,
+      "approx_cost_usd": null
     }
   },
   "per_clip": {
@@ -101,6 +101,28 @@
       {
         "clip_id": "PROMO-02",
         "system": "PROMOIQ",
+        "duration": 53.3,
+        "segments": [
+          [
+            3,
+            84.0,
+            137.3
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 10.0,
+        "cliff": 9.3,
+        "clarity": 7.8,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-03",
+        "system": "PROMOIQ",
         "duration": 28.78,
         "segments": [
           [
@@ -126,7 +148,29 @@
         "spoiler": 0.0
       },
       {
-        "clip_id": "PROMO-03",
+        "clip_id": "PROMO-04",
+        "system": "PROMOIQ",
+        "duration": 44.7,
+        "segments": [
+          [
+            30,
+            43.8,
+            88.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 6.5,
+        "cliff": 9.9,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-05",
         "system": "PROMOIQ",
         "duration": 29.2,
         "segments": [
@@ -148,14 +192,14 @@
         "spoiler": 0.0
       },
       {
-        "clip_id": "PROMO-04",
+        "clip_id": "PROMO-06",
         "system": "PROMOIQ",
-        "duration": 25.5,
+        "duration": 35.7,
         "segments": [
           [
-            28,
-            113.0,
-            138.5
+            27,
+            92.8,
+            128.5
           ]
         ],
         "duration_ok": true,
@@ -163,14 +207,36 @@
         "timestamps_are_source": true,
         "no_midline_cut": true,
         "midline_cuts": 0,
-        "hook": 9.2,
+        "hook": 7.39,
         "cliff": 10.0,
         "clarity": 9.0,
         "coherence": 9.0,
         "spoiler": 0.0
       },
       {
-        "clip_id": "PROMO-05",
+        "clip_id": "PROMO-07",
+        "system": "PROMOIQ",
+        "duration": 55.6,
+        "segments": [
+          [
+            12,
+            13.9,
+            69.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.99,
+        "cliff": 9.9,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-08",
         "system": "PROMOIQ",
         "duration": 26.8,
         "segments": [
@@ -187,6 +253,50 @@
         "midline_cuts": 0,
         "hook": 8.46,
         "cliff": 9.9,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-09",
+        "system": "PROMOIQ",
+        "duration": 47.0,
+        "segments": [
+          [
+            23,
+            84.5,
+            131.5
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 9.05,
+        "cliff": 9.6,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "PROMO-10",
+        "system": "PROMOIQ",
+        "duration": 51.4,
+        "segments": [
+          [
+            2,
+            58.6,
+            110.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 7.58,
+        "cliff": 9.39,
         "clarity": 9.0,
         "coherence": 9.0,
         "spoiler": 0.0
@@ -704,14 +814,14 @@
         "spoiler": 0.0
       },
       {
-        "clip_id": "A-01",
+        "clip_id": "A-15",
         "system": "A_llm_only",
-        "duration": 45.3,
+        "duration": 39.5,
         "segments": [
           [
-            1,
-            33.7,
-            79.0
+            15,
+            46.5,
+            86.0
           ]
         ],
         "duration_ok": true,
@@ -719,21 +829,21 @@
         "timestamps_are_source": true,
         "no_midline_cut": true,
         "midline_cuts": 0,
-        "hook": 5.23,
-        "cliff": 7.08,
+        "hook": 10.0,
+        "cliff": 10.0,
         "clarity": 9.0,
         "coherence": 9.0,
         "spoiler": 0.0
       },
       {
-        "clip_id": "A-02",
+        "clip_id": "A-16",
         "system": "A_llm_only",
-        "duration": 40.7,
+        "duration": 40.9,
         "segments": [
           [
-            2,
-            69.3,
-            110.0
+            16,
+            14.3,
+            55.2
           ]
         ],
         "duration_ok": true,
@@ -741,146 +851,141 @@
         "timestamps_are_source": true,
         "no_midline_cut": true,
         "midline_cuts": 0,
-        "hook": 7.3,
+        "hook": 9.61,
+        "cliff": 4.89,
+        "clarity": 6.6,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-22",
+        "system": "A_llm_only",
+        "duration": 52.5,
+        "segments": [
+          [
+            22,
+            78.5,
+            131.0
+          ]
+        ],
+        "duration_ok": true,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 3.58,
+        "cliff": 10.0,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-23",
+        "system": "A_llm_only",
+        "duration": 61.0,
+        "segments": [
+          [
+            23,
+            70.5,
+            131.5
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 2.4,
+        "cliff": 9.6,
+        "clarity": 9.0,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-24",
+        "system": "A_llm_only",
+        "duration": 69.5,
+        "segments": [
+          [
+            24,
+            22.5,
+            92.0
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 6.3,
+        "cliff": 9.39,
+        "clarity": 8.4,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-26",
+        "system": "A_llm_only",
+        "duration": 65.08,
+        "segments": [
+          [
+            26,
+            55.8,
+            120.88
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 8.51,
+        "cliff": 10.0,
+        "clarity": 8.2,
+        "coherence": 9.0,
+        "spoiler": 0.0
+      },
+      {
+        "clip_id": "A-27",
+        "system": "A_llm_only",
+        "duration": 85.7,
+        "segments": [
+          [
+            27,
+            64.8,
+            150.5
+          ]
+        ],
+        "duration_ok": false,
+        "valid_refs": true,
+        "timestamps_are_source": true,
+        "no_midline_cut": true,
+        "midline_cuts": 0,
+        "hook": 5.7,
         "cliff": 9.39,
         "clarity": 9.0,
-        "coherence": 9.0,
-        "spoiler": 0.0
-      },
-      {
-        "clip_id": "A-11",
-        "system": "A_llm_only",
-        "duration": 59.75,
-        "segments": [
-          [
-            11,
-            16.8,
-            53.6
-          ],
-          [
-            11,
-            89.8,
-            112.75
-          ]
-        ],
-        "duration_ok": true,
-        "valid_refs": true,
-        "timestamps_are_source": true,
-        "no_midline_cut": false,
-        "midline_cuts": 1,
-        "hook": 8.5,
-        "cliff": 10.0,
-        "clarity": 8.1,
-        "coherence": 8.0,
-        "spoiler": 0.0
-      },
-      {
-        "clip_id": "A-12",
-        "system": "A_llm_only",
-        "duration": 43.21,
-        "segments": [
-          [
-            12,
-            44.0,
-            87.21
-          ]
-        ],
-        "duration_ok": true,
-        "valid_refs": true,
-        "timestamps_are_source": true,
-        "no_midline_cut": true,
-        "midline_cuts": 0,
-        "hook": 7.1,
-        "cliff": 10.0,
-        "clarity": 9.0,
-        "coherence": 9.0,
-        "spoiler": 0.0
-      },
-      {
-        "clip_id": "A-07",
-        "system": "A_llm_only",
-        "duration": 36.7,
-        "segments": [
-          [
-            7,
-            54.8,
-            91.5
-          ]
-        ],
-        "duration_ok": true,
-        "valid_refs": true,
-        "timestamps_are_source": true,
-        "no_midline_cut": true,
-        "midline_cuts": 0,
-        "hook": 1.92,
-        "cliff": 4.42,
-        "clarity": 9.0,
-        "coherence": 9.0,
-        "spoiler": 0.0
-      },
-      {
-        "clip_id": "A-10",
-        "system": "A_llm_only",
-        "duration": 37.1,
-        "segments": [
-          [
-            10,
-            2.1,
-            39.2
-          ]
-        ],
-        "duration_ok": true,
-        "valid_refs": true,
-        "timestamps_are_source": true,
-        "no_midline_cut": true,
-        "midline_cuts": 0,
-        "hook": 8.39,
-        "cliff": 4.89,
-        "clarity": 8.0,
-        "coherence": 9.0,
-        "spoiler": 0.0
-      },
-      {
-        "clip_id": "A-06",
-        "system": "A_llm_only",
-        "duration": 39.3,
-        "segments": [
-          [
-            6,
-            7.1,
-            46.4
-          ]
-        ],
-        "duration_ok": true,
-        "valid_refs": true,
-        "timestamps_are_source": true,
-        "no_midline_cut": false,
-        "midline_cuts": 1,
-        "hook": 4.38,
-        "cliff": 4.68,
-        "clarity": 8.0,
         "coherence": 9.0,
         "spoiler": 0.0
       }
     ]
   },
   "baseline_A_all_episodes": {
-    "n": 12,
-    "duration_compliance_%": 91.7,
+    "n": 28,
+    "duration_compliance_%": 78.6,
     "timestamps_are_source_%": 100.0,
-    "no_midline_cut_%": 83.3,
-    "hook_pass_%": 66.7,
-    "cliffhanger_pass_%": 75.0,
-    "standalone_pass_%": 100.0,
-    "mean_hook": 6.04,
-    "mean_cliff": 7.34,
-    "mean_clarity": 8.33,
-    "mean_coherence": 8.92,
+    "no_midline_cut_%": 89.3,
+    "hook_pass_%": 60.7,
+    "cliffhanger_pass_%": 82.1,
+    "standalone_pass_%": 96.4,
+    "mean_hook": 5.75,
+    "mean_cliff": 7.79,
+    "mean_clarity": 8.18,
+    "mean_coherence": 8.91,
     "spoiler_flag_%": 0.0,
     "near_duplicate_%": 0.0,
-    "processing_s": 0.0,
-    "model_calls": 0,
-    "approx_cost_usd": 0.0,
+    "processing_s": 299.07,
+    "model_calls": 17,
+    "approx_cost_usd": null,
     "note": "all promos the LLM returned (one per episode), not just its top 10"
   }
 }

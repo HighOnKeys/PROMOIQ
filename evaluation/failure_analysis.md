@@ -131,7 +131,7 @@ comes from `outputs/gemini/` (private) and `evaluation/results/compare_offline_v
 | 15 | "No quote given" counted as an invented quote | Quote audit | Fixed |
 | 16 | LLM scores inflated and barely agree with the offline scorer | Measurement | Partly contained |
 | 17 | LLM cold viewer's verdict contradicts its own score | Judge outputs | Open |
-| 18 | Free-tier judge budget too small for a diverse shortlist | Live run | Open: limited by quota |
+| 18 | Free-tier judge budget too small for a diverse shortlist | Live run | Partly fixed: 19 judged over two days |
 | 19 | A wrong assumption: LLM-only extraction keeps real timestamps | Benchmark | Documented |
 
 ## 12. Default model retired for new keys
@@ -183,28 +183,37 @@ All 70 quotes that aren't verbatim are flagged; none is silently trusted.
 - **Proposed fix (not run, needs more quota).** Calibrate LLM scores per show, using rank or percentile instead of the raw 0–5 values, before applying the gates. Also give the model scored reference examples in the prompt.
 
 ## 17. The LLM cold viewer's verdict contradicts its own score (open)
-- **What happened.** The LLM cold viewer (`gemini-3.1-flash-lite`, which sees only the promo) said **standalone = false for 8 of 9** candidates. Yet it gave most of them a clarity score of 6/10, which passes the gate of 5.
+- **What happened.** The LLM cold viewer (`gemini-3.1-flash-lite`, which sees only the promo) said **standalone = false for 8 of 9** candidates in round 1, and **15 of 19** once round 2 was added. Yet its mean clarity score is 6.2/10, which passes the gate of 5. Only 3 of the 19 were rejected as not standalone.
 - **Why.** Its "missing information" lists are almost all backstory, such as "why is Juliana in custody" or "the history between Juliana and Catherine". A promo is designed to withhold exactly this. The judge prompt mixes up "I can follow what is happening" with "I know the backstory".
 - **What this confirms.** The offline clarity proxy, which passes 100% of promos (§9), is far too lenient.
 - **Proposed fix.** Split the question into two: "Is the situation and conflict legible?" (a gate) and "What backstory is missing?" (information for the editor). Then gate on the first only.
 
-## 18. The free-tier judge budget is too small for a diverse shortlist (open)
-- **What happened.** With 20 requests per day, I could afford LLM judging for only **9** distinct candidates. Four failed the gates (3 not standalone, 1 spoiler), so the Gemini shortlist has **5** promos, not 10.
-- **Consequences.**
-  - All 5 come from the episode 28–32 dungeon/poison arc.
-  - 2 of the 5 are same-scene near-duplicates (near-duplicate rate 20%, against 0% offline).
-  - **None of them overlaps the offline shortlist.**
-- **What they are.** The picks are genuine high-tension scenes. The E28 one was among the offline "strong alternatives held back", and the E32 one was an offline pick in run 2.
-- **Fix.** This is a quota limit, not a code limit. With a paid tier, run 30+ judged candidates (`PROMOIQ_JUDGE_BUDGET`). Or judge more candidates per day across several days; the cache makes runs resumable.
-- **Other costs.** The judge model also hit 503 overloads, so the LLM run took **17 min** against about 20 s offline.
+## 18. The free-tier judge budget is too small for a diverse shortlist (partly fixed)
+- **What happened in round 1.** With 20 requests per day, I could afford LLM judging for only **9** distinct candidates. Four failed the gates (3 not standalone, 1 spoiler), so the Gemini shortlist had only **5** promos.
+  - All 5 came from the episode 28–32 dungeon/poison arc.
+  - 2 of the 5 were same-scene near-duplicates (near-duplicate rate 20%, against 0% offline).
+  - None of them overlapped the offline shortlist.
+- **Round 2.** After the daily reset, 10 more candidates were judged: 20 new calls, while the first 9 came from cache. A dry run with the live call stubbed out confirmed that count before any quota was spent.
+  - 5 of the 19 failed the gates (3 not standalone, 2 spoiler risk).
+  - The shortlist is now **10** promos from **10 episodes** (E2, 3, 12, 23, 27–32), with **0%** near-duplicates.
+  - One pick is exactly the offline #1 (E27).
+  - So the single-arc result was mostly an artefact of the small judged pool. 6 of the 10 picks still come from episodes 27–32.
+- **What is still open.** 19 candidates is below the 30+ I would judge on a paid tier (`PROMOIQ_JUDGE_BUDGET`). The cache makes the run resumable day by day.
+- **Other costs.**
+  - Judging took **13 min** for 20 calls, about 38 s per call including the 13 s pacing. The whole offline run takes about 20 s.
+  - On `gemini-3.6-flash`, the daily cap arrived after 17 answered calls. Together with the three 503 errors that day, that makes 20. So failed 503 calls probably count against the free-tier quota, and retries are not free.
 
 ## 19. A wrong assumption: LLM-only extraction keeps real timestamps
 - **What I assumed.** I expected Baseline A (one prompt per raw episode, no parsing help) to invent timestamps.
-- **What happened.** On 12 episodes with `gemini-3.6-flash`:
-  - **100%** of its cut points are real screenplay timestamps.
-  - It cut through a line in 2 of 10 promos, kept 9 of 10 within 20–60 s, and had 0 unparseable answers.
+- **What happened.** `gemini-3.6-flash` returned promos for 28 episodes:
+  - **100%** of its cut points are real screenplay timestamps, with 0 unparseable answers.
+  - It cut through a line in 3 of 28 promos.
+  - 6 of 28 fall outside 20–60 s, including **5 of its own top 10** (61–86 s). Round 1's 12 episodes had hidden this: 9 of 10 were in range.
 - **What it means.** PROMOIQ's real advantages over a good LLM are guarantees and checks, not basic timestamp extraction:
   - Every cut is guaranteed legal, never just usually right.
   - It searches every window, plus multi-segment joins.
   - It applies gates and diversity, and explains its rejections.
-- **Caveat.** Baseline A covered only 12 of 50 episodes, because the other 38 calls were lost to failure 14 and then to the quota.
+- **Caveat.** Baseline A covers 28 of 50 episodes:
+  - Round 1 lost 38 calls to failure 14 and then to the quota.
+  - Round 2 added episodes 13–28.
+  - Episode 29's answer failed validation, and the retry hit the daily cap.

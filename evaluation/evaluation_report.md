@@ -9,7 +9,7 @@ Every number here comes from `evaluation/results/benchmark.json` and `evaluation
 | PROMOIQ | Full pipeline: legal cut points, hook/cliffhanger/clarity objective, continuous enumeration + beam search, validator, judges, gates, diversity pass |
 | A0 keyword window | No AI: picks the dialogue lines with the most dramatic keywords and cuts a fixed 30 s window around each |
 | B event ranking | Ranks beats by PROMOIQ's own tension score and extends each to ≥ 30 s. Uses the same features, but no sequence construction, gates or diversity |
-| A LLM-only | One prompt per episode with the raw script (`baselines.baseline_a_llm`). **Not run:** no API key was available |
+| A LLM-only | One prompt per episode with the raw script (`baselines.baseline_a_llm`). Run on Gemini for 28 of 50 episodes, reported in the live LLM section below |
 
 ## Automatic metrics
 
@@ -57,34 +57,48 @@ Setup: 18 clips (PROMOIQ 8, B 5, A0 5) were shuffled with system labels hidden, 
 
 ## What a real validation would add
 1. Human editors fill in `human_eval/human_ratings_TEMPLATE.csv` for the fresh blind sheet in `outputs/evaluation/`. Then run `python -m evaluation.review_summary <file>`.
-2. Run Baseline A on all 50 episodes and LLM-judge 30+ candidates. The free tier only allowed 12 episodes and 9 candidates (see below).
+2. Run Baseline A on all 50 episodes and LLM-judge 30+ candidates. Two days of free tier allowed 28 episodes and 19 candidates (see below).
 3. Online: A/B test shortlisted promos against editor-picked ones on 3-second hold rate, completion and click-through to episode 1, and track how many shortlist picks editors keep.
 
 ## Live LLM run: Gemini free tier
 
+The run took two days of free-tier quota (20 requests per day per model). Round 2 ran after the daily reset and reused every cached answer from round 1, so it paid only for new work.
+
 **Setup.**
-- Annotation: `gemini-3-flash-preview`, 5 episodes per call (10 calls) plus 1 story-bible call.
-- Judges: `gemini-3.1-flash-lite`, a different model, judging 9 distinct candidates (18 calls).
-- Baseline A: `gemini-3.6-flash`, 12 of 50 episodes, because the free tier allows 20 requests per day per model.
-- Cost: 42 live calls, $0. Wall time 17 min; 503 overloads accounted for most of it.
+- Annotation: `gemini-3-flash-preview`, 5 episodes per call (10 calls) plus 1 story-bible call. These were made once, in round 1.
+- Judges: `gemini-3.1-flash-lite`, a different model, judging 19 distinct candidates (38 calls: 9 candidates in round 1, 10 more in round 2).
+- Baseline A: `gemini-3.6-flash`, which returned promos for 28 of 50 episodes:
+  - Round 1 covered episodes 1–12.
+  - Round 2 added episodes 13–28.
+  - Episode 29's answer failed validation, and the retry hit the daily cap.
+- Cost: 80 live calls logged, $0. Round 1 had 43 calls and took 17 min; round 2 had 37 calls and took 18 min. Most of the time went on 13 s pacing and 503 back-offs.
 
-Sources: `results/gemini/`, `results/compare_offline_vs_llm.json`, `failure_analysis.md` §12–19.
+Sources: `results/gemini/`, `results/compare_offline_vs_llm.json`, `failure_analysis.md` §12–19. Round-1 outputs are kept in `outputs/history/`.
 
-| | Offline (heuristic) | Gemini |
-|---|---|---|
-| Candidates passing every gate | 1,243 | 2,342 (inflated LLM scores, §16) |
-| Rejected for no hook evidence in the first 3 s (code check) | 0 | 152 |
-| Shortlist size | 10 | 5 (judge budget, §18) |
-| Episodes covered by the shortlist | 1, 11, 23, 24, 27, 28, 31, 32, 36, 42+44 | 28, 29, 31, 32 |
-| Shortlist near-duplicates | 0% | 20% |
-| Cold viewer: standalone pass rate on judged candidates | 100% (proxy too lenient) | 1 of 9 by the LLM's own verdict (§17) |
-| Quotes not in the cited beat | n/a | 70 of 1,503 (7 mostly absent) |
+| | Offline (heuristic) | Gemini, round 1 | Gemini, round 2 (current) |
+|---|---|---|---|
+| Candidates passing every gate | 1,243 | 2,342 | 2,341 (inflated LLM scores, §16) |
+| Rejected for no hook evidence in the first 3 s (code check) | 0 | 152 | 152 |
+| Candidates judged by the LLM | — | 9 | 19 |
+| Shortlist size | 10 | 5 | 10 |
+| Episodes covered by the shortlist | 1, 11, 23, 24, 27, 28, 31, 32, 36, 42+44 | 28, 29, 31, 32 | 2, 3, 12, 23, 27, 28, 29, 30, 31, 32 |
+| Shortlist near-duplicates | 0% | 20% | 0% |
+| Picks shared with the offline shortlist | — | 0 of 5 | 1 of 10 (offline #1, E27) |
+| Cold viewer: "not standalone" verdicts | 0% (proxy too lenient) | 8 of 9 | 15 of 19 (§17) |
+| Quotes not in the cited beat | n/a | 70 of 1,503 (7 mostly absent) | same annotations |
 
-**Baseline A (LLM-only, top 10 of 12 episodes)**
-- 100% of cuts are real screenplay timestamps.
-- 80% have no line cut mid-way.
-- 90% are within 20–60 s.
+**Baseline A (LLM-only)**
 
-So an LLM alone extracts timestamps well. PROMOIQ adds guarantees (100% on all three), exhaustive search, multi-segment joins, gates and explanations.
+| | Top 10, round 1 (12 episodes) | Top 10, round 2 (28 episodes) | All 28 promos |
+|---|---|---|---|
+| Cuts on real screenplay timestamps | 100% | 100% | 100% |
+| No line cut mid-way | 80% | 100% | 89% (3 cut a line) |
+| Duration within 20–60 s | 90% | 50% | 79% (6 out of range) |
 
-**Reading.** The LLM is a different judge, not a better-calibrated one. Its picks don't overlap the offline shortlist. It also concentrates on one arc, which is partly caused by the small judged pool. A human review of both shortlists is the only way to say which is better, and that has not been done.
+An LLM alone extracts timestamps well, but it does not respect the format. 5 of its 10 highest-scored promos run 61–86 s. PROMOIQ guarantees 100% on all three rows, and adds exhaustive search, multi-segment joins, gates and explanations.
+
+**Reading.**
+- **The LLM is a different judge, not a better-calibrated one.** With 19 judged candidates, the round-2 shortlist spreads over 10 episodes and has no near-duplicates. So most of round 1's single-arc concentration came from the small judged pool.
+- **Overlap with the offline list is still small.** The one shared pick is the offline #1.
+- **6 of the 10 picks still come from episodes 27–32.**
+- **Only a human review of both shortlists can say which is better,** and that has not been done.
