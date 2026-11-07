@@ -65,7 +65,8 @@ W = A4[0] - 2.4 * cm
 
 story = []
 story += [P("PROMOIQ: narrative-aware promo discovery for microdrama screenplays", h1),
-          P("<b>Kumar Manas</b> · Roll no. 23119016 · kumar_m@me.iitr.ac.in", small),
+          P("<b>Kumar Manas</b> · Roll no. 23119016 · kumar_m@me.iitr.ac.in · Code and run steps: "
+            "<a href=\"https://github.com/HighOnKeys/PROMOIQ\" color=\"blue\">github.com/HighOnKeys/PROMOIQ</a>", small),
           P(f"Kuku AI Generalist assignment · Problem 1: Find the Promos · show: <i>{m['show']}</i> (50 episodes)", small),
           Spacer(1, 3)]
 
