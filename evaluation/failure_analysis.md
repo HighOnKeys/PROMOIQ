@@ -179,7 +179,7 @@ All 70 quotes that aren't verbatim are flagged; none is silently trusted.
 | Emotion | 1.23 | 3.82 | 0.36 |
 | Conflict | 1.12 | 3.07 | 0.46 (highest) |
 
-  Category labels overlap by Jaccard 0.13. With scores this high, **2,342** candidates pass the gates, against 1,243 offline. So the gates filter less.
+  Category labels overlap by Jaccard 0.13. With scores this high, **2,342** candidates pass the gates, against 1,243 offline (2,340 in the final Gemini run, §21). So the gates filter less.
 - **What still works.** The code validator rejected **152** candidates that the LLM rated as strong hooks but where nothing substantive happens in the first 3 seconds (`hook_evidence_first_3s`). This is the "AI interprets, code verifies" split doing its job.
 - **Proposed fix (not run, needs more quota).** Calibrate LLM scores per show, using rank or percentile instead of the raw 0–5 values, before applying the gates. Also give the model scored reference examples in the prompt.
 
@@ -253,6 +253,7 @@ The failures below are about judgment and packaging.
   - Offline: no candidate affected, and the shortlist is byte-identical.
   - Gemini, re-run entirely from cache with 0 new calls: exactly this candidate is rejected. An E29 clip (00:56.60–01:28.80) enters at #10, which puts two E29 clips from the same scene on the list (near-duplicates 10%).
   - A test checks that the judge's verdict rejects candidates. It fails on the old code.
+  - **Later correction.** The heuristic judge derives this verdict from the same cliffhanger score, so at first the new reason repeated "weak cliffhanger" on 1,765 offline rejections. It is now reported only when the score gate did not already fire. The offline reason counts are back to normal, and the Gemini run shows this reason once.
 
 ## 22. The same payoff repeated across episodes slips past duplicate detection (open)
 - **What happened.** Both shortlists report 0% near-duplicates, yet:

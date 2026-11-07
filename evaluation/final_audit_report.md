@@ -182,3 +182,22 @@ For the optional Gemini path, put `GEMINI_API_KEY` in `.env`, then run `python -
 | Evaluation | `evaluation/evaluation_report.md`, `evaluation/failure_analysis.md`, `evaluation/results/` |
 | Walkthrough script | `docs/walkthrough_script.md` |
 | This audit | `evaluation/final_audit_report.md` |
+
+## 10. Addendum: inspection of the final deliverables
+
+A last read of every deliverable, as a reviewer would open it, found these problems. All are fixed. Both pipelines were re-run (Gemini fully from cache, 0 calls), both shortlists and their alternatives are unchanged, the verifier reports 0 problems, and all 33 tests pass.
+
+- **The audit gate double-counted.** The heuristic judge's "leaves a question" verdict is just cliffhanger ≥ 5. So the new gate added "ending leaves no open question" to the same 1,765 candidates already rejected as "weak cliffhanger", and the editorial report listed both. The verdict is now reported only when the score gate passed. Offline reasons match the PDF again; in the Gemini run the verdict appears once.
+- **The editorial report said** "MMR demotes" lower ranks. In fact MMR chooses the ten and score orders them; the wording is corrected.
+- **Gate reasons showed "5.0 < 5.0"** (a 4.97 rounded). They now use two decimals.
+- **The walkthrough script** said "eleven" failures (now 25) and "ten angles" (ten promos across six angles). The #1 passage is tightened to fit its 35 s slot, and round 2 is mentioned.
+- **README fixes.**
+  - Python 3.9+ and the one-time model download are noted.
+  - Only Gemini has been tested against a real API; this is now stated.
+  - Gemini failure cases now point to 12–19 and 21.
+  - The sharing advice now matches the brief's "anyone with the link".
+
+Still yours to do:
+- ~~Add your name and roll number to the PDF.~~ Done: the PDF header and its metadata now give Kumar Manas, roll no. 23119016, kumar_m@me.iitr.ac.in.
+- **Leave stale folders out of the raw-outputs share.** `outputs/app_run/` is an app run from 07:36, before today's fixes, and `outputs/history/` holds old snapshots.
+

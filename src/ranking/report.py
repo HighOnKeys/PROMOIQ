@@ -60,7 +60,8 @@ def write_report(path: Path, show, ranked, rejected, evals, meta, dup_log, alter
         themes = Counter(r["theme"] for r in ranked)
         L.append(f"- The shortlist spans {len(themes)} angles ({', '.join(f'{t} x{n}' for t, n in themes.most_common())}), so promos can be "
                  "rotated or A/B tested against different audience interests.")
-        L.append("- Lower ranks are not weaker scenes in absolute terms: MMR demotes candidates that repeat a moment already chosen.")
+        L.append("- The diversity pass (MMR) decides which ten make the list; the order within it is by score. Scenes left out only "
+                 "because they repeat a chosen angle are listed below as alternatives.")
     if alternatives:
         L.append("\n## Strong alternatives held back for diversity\n")
         L.append("These scored at least as well as the last shortlisted promo but repeat an angle already chosen. "

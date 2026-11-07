@@ -15,8 +15,8 @@ It runs fully offline in about 20 s for the 50-episode pack. Any LLM can be plug
 ## Quick start
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+python3 -m venv .venv && source .venv/bin/activate     # Python 3.9+ (built and tested on 3.10)
+pip install -r requirements.txt                       # first run also downloads the ~90 MB MiniLM model
 ```
 
 1. Put the episode `.txt` files in `data/input/`. Any subfolder works, and a `.zip` can be passed with `--input`. This folder is git-ignored.
@@ -60,7 +60,7 @@ export PROMOIQ_JUDGE_PROVIDER=anthropic ANTHROPIC_API_KEY=... # optional: a diff
 python -m src.pipeline
 ```
 
-`openai_compat` works with OpenAI, Groq, OpenRouter, Together, or a local vLLM/Ollama server (`OPENAI_BASE_URL`).
+`openai_compat` works with OpenAI, Groq, OpenRouter, Together, or a local vLLM/Ollama server (`OPENAI_BASE_URL`). Only the Gemini provider has been run against a real API. The Anthropic and OpenAI-compatible clients are implemented but have never been run against a real API. The shared gateway they use is tested with a fake provider.
 
 Every model call goes through `src/llm/client.py`, which handles:
 - **Caching:** results are stored on disk, so re-runs are free.
@@ -69,7 +69,7 @@ Every model call goes through `src/llm/client.py`, which handles:
 - **Usage counts.**
 - **Validation:** outputs are checked with pydantic. Quotes the model cites are checked against the screenplay, and unverifiable ones are flagged.
 
-**Live status:** the LLM path has been run on the full pack with a free Gemini key: 80 calls over two days, $0. This covers 19 LLM-judged candidates, a 10-promo Gemini shortlist, and Baseline A on 28 episodes. See `evaluation/evaluation_report.md` and failure cases 12–19 in `evaluation/failure_analysis.md`. Free-tier keys allow about **20 requests per day per model**, so use the batched settings:
+**Live status:** the LLM path has been run on the full pack with a free Gemini key: 80 calls over two days, $0. This covers 19 LLM-judged candidates, a 10-promo Gemini shortlist, and Baseline A on 28 episodes. See `evaluation/evaluation_report.md` and failure cases 12–19 and 21 in `evaluation/failure_analysis.md`. Free-tier keys allow about **20 requests per day per model**, so use the batched settings:
 
 ```bash
 python -m src.llm.smoke     # one call: checks the key, lists the models it can use
@@ -143,7 +143,7 @@ Blind review round 1 (18 clips, 6 pairs) was rated by the AI coding assistant. I
 
 ## Confidentiality
 
-The input pack is Kuku's content. `data/`, `outputs/`, `*.zip` and the brief PDF are git-ignored. The app is bound to `localhost` with telemetry off. The tests use synthetic scripts only. Do **not** deploy the app publicly with the real pack, and share `outputs/` only through a private link.
+The input pack is Kuku's content. `data/`, `outputs/`, `*.zip` and the brief PDF are git-ignored. The app is bound to `localhost` with telemetry off. The tests use synthetic scripts only. Do **not** deploy the app publicly with the real pack. Share `outputs/` with Kuku through an unlisted "anyone with the link" folder (the brief asks for links that open for anyone who has them), never through a public repository.
 
 ## Project layout
 
@@ -158,7 +158,7 @@ src/ranking/           duplicates, MMR shortlist, counterfactuals, markdown repo
 src/llm/               provider-agnostic gateway (cache, retries, raw log, usage)
 src/pipeline.py        end-to-end orchestration (CLI)
 app.py                 Streamlit editorial UI
-evaluation/            baselines, benchmark, review summary, failure analysis, human-eval templates
+evaluation/            baselines, benchmark, source verifier, review summary, failure analysis, final audit, human-eval templates
 docs/                  2-page solution PDF (+ builder), walkthrough script
 tests/                 unit + end-to-end tests
 ```

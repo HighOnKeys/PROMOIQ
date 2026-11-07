@@ -260,17 +260,18 @@ def run(input_path: Optional[Path] = None, settings: Optional[Settings] = None,
         reasons = [f"hard:{f}" for f in v["failed"]]
         g = st.gates
         if c.scores.hook < g.hook_pass:
-            reasons.append(f"weak hook ({c.scores.hook:.1f} < {g.hook_pass})")
+            reasons.append(f"weak hook ({c.scores.hook:.2f} < {g.hook_pass})")
         if c.scores.cliffhanger < g.cliffhanger_pass:
-            reasons.append(f"weak cliffhanger ({c.scores.cliffhanger:.1f} < {g.cliffhanger_pass})")
+            reasons.append(f"weak cliffhanger ({c.scores.cliffhanger:.2f} < {g.cliffhanger_pass})")
         # the brief requires a cliffhanger: if the integrity judge says the ending leaves no open question,
-        # a high generator score must not outweigh that verdict
-        if not ig.ending_leaves_question:
+        # a high generator score must not outweigh that verdict. (The heuristic judge derives this verdict
+        # from the same cliffhanger score, so only report it when the score gate did not already fire.)
+        elif not ig.ending_leaves_question:
             reasons.append("ending leaves no open question (integrity judge)")
         if cv.clarity_score < g.clarity_pass:
-            reasons.append(f"not standalone ({cv.clarity_score:.1f} < {g.clarity_pass}): " + "; ".join(cv.missing_information[:2]))
+            reasons.append(f"not standalone ({cv.clarity_score:.2f} < {g.clarity_pass}): " + "; ".join(cv.missing_information[:2]))
         if c.mode == "multi_segment" and c.scores.coherence < g.multi_coherence_pass:
-            reasons.append(f"incoherent multi-segment join ({c.scores.coherence:.1f} < {g.multi_coherence_pass})")
+            reasons.append(f"incoherent multi-segment join ({c.scores.coherence:.2f} < {g.multi_coherence_pass})")
         if ig.spoiler_risk > g.max_spoiler:
             reasons.append(f"spoiler risk {ig.spoiler_risk:.1f} ({', '.join(ig.spoiler_types)})")
         final_score = c.scores.quality - (0.4 if ig.answered_inside_promo else 0.0) - (0.3 if not ig.hook_connected_to_ending else 0.0)

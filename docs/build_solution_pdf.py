@@ -65,6 +65,7 @@ W = A4[0] - 2.4 * cm
 
 story = []
 story += [P("PROMOIQ: narrative-aware promo discovery for microdrama screenplays", h1),
+          P("<b>Kumar Manas</b> · Roll no. 23119016 · kumar_m@me.iitr.ac.in", small),
           P(f"Kuku AI Generalist assignment · Problem 1: Find the Promos · show: <i>{m['show']}</i> (50 episodes)", small),
           Spacer(1, 3)]
 
@@ -233,6 +234,6 @@ story += [P("Limitations", h2), P(
 
 doc = SimpleDocTemplate(str(ROOT / "docs" / "PROMOIQ_solution.pdf"), pagesize=A4, leftMargin=1.2 * cm,
                         rightMargin=1.2 * cm, topMargin=1.0 * cm, bottomMargin=0.9 * cm,
-                        title="PROMOIQ solution", author="PROMOIQ")
+                        title="PROMOIQ solution: Kumar Manas (23119016)", author="Kumar Manas")
 doc.build(story)
 print("written", ROOT / "docs" / "PROMOIQ_solution.pdf")

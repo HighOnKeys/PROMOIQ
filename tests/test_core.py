@@ -284,7 +284,12 @@ def test_judge_saying_no_open_question_rejects_candidate(tmp_path, monkeypatch):
     res = run(d, settings=st, out_root=tmp_path / "out")
     assert not res["ranked"]
     rejected = json.loads((tmp_path / "out/processed/rejected_candidates.json").read_text())
-    assert rejected and all(any("no open question" in r for r in x["reasons"]) for x in rejected)
+    gate = st.gates.cliffhanger_pass
+    # every candidate whose cliffhanger score passed is now rejected by the judge's verdict instead
+    passed_score = [x for x in rejected if x["scores"]["cliffhanger"] >= gate]
+    assert passed_score and all(any("no open question" in r for r in x["reasons"]) for x in passed_score)
+    # and the verdict is not reported twice for candidates the score gate already rejected
+    assert not any(any("no open question" in r for r in x["reasons"]) for x in rejected if x["scores"]["cliffhanger"] < gate)
 
 
 def test_mmr_prefers_diverse_item():

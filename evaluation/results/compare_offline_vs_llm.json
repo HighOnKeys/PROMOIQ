@@ -93,7 +93,6 @@
     "reject_reasons": {
       "offline": {
         "weak cliffhanger": 1765,
-        "ending leaves no open question": 1765,
         "weak hook": 669,
         "spoiler risk": 92,
         "not standalone": 14,
@@ -101,17 +100,17 @@
       },
       "llm": {
         "weak hook": 601,
-        "ending leaves no open question": 306,
         "weak cliffhanger": 305,
         "spoiler risk": 153,
         "hard:hook_evidence_first_3s": 152,
         "incoherent multi-segment join": 21,
-        "not standalone": 7
+        "not standalone": 7,
+        "ending leaves no open question": 1
       }
     },
     "total_s": {
-      "offline": 15.95,
-      "llm": 12.36
+      "offline": 17.59,
+      "llm": 12.58
     },
     "models": {
       "offline": {
