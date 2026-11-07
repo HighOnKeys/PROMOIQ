@@ -1,0 +1,97 @@
+{
+  "ratings_file": "ai_review_ratings.csv",
+  "reviewer": "Claude Opus 5.5 (AI assistant; NOT human; built the system)",
+  "systems": {
+    "A0_keyword_window": {
+      "hook": 2.0,
+      "cliffhanger": 2.4,
+      "standalone": 3.4,
+      "emotional_appeal": 3.4,
+      "coherence": 3.2,
+      "overall": 2.88,
+      "n": 5,
+      "clips_with_timestamp_issue": 5,
+      "share_rated_4plus_overall": 0.0
+    },
+    "PROMOIQ": {
+      "hook": 3.38,
+      "cliffhanger": 4.0,
+      "standalone": 3.5,
+      "emotional_appeal": 4.25,
+      "coherence": 4.62,
+      "overall": 3.95,
+      "n": 8,
+      "clips_with_timestamp_issue": 0,
+      "share_rated_4plus_overall": 0.5
+    },
+    "B_event_rank": {
+      "hook": 4.2,
+      "cliffhanger": 2.6,
+      "standalone": 3.6,
+      "emotional_appeal": 4.0,
+      "coherence": 4.4,
+      "overall": 3.76,
+      "n": 5,
+      "clips_with_timestamp_issue": 0,
+      "share_rated_4plus_overall": 0.4
+    }
+  },
+  "pairwise": {
+    "wins": {
+      "B_event_rank": 1,
+      "PROMOIQ": 5
+    },
+    "n": 6,
+    "reviewer_model_agreement": "5/6",
+    "details": [
+      {
+        "pair": "P1",
+        "X": "PROMOIQ:PROMO-01",
+        "Y": "B_event_rank:B-01",
+        "reviewer_choice": "B_event_rank:B-01",
+        "model_choice": "PROMOIQ:PROMO-01",
+        "reason": "physical hook and a mysterious protector that a stranger understands instantly; X needs to know who is sick and why"
+      },
+      {
+        "pair": "P2",
+        "X": "PROMOIQ:PROMO-02",
+        "Y": "B_event_rank:B-02",
+        "reviewer_choice": "PROMOIQ:PROMO-02",
+        "model_choice": "PROMOIQ:PROMO-02",
+        "reason": "strike in the first 2s and ends on a threat; Y has the bigger hook but ends on a resolving reunion"
+      },
+      {
+        "pair": "P3",
+        "X": "B_event_rank:B-03",
+        "Y": "PROMOIQ:PROMO-03",
+        "reviewer_choice": "PROMOIQ:PROMO-03",
+        "model_choice": "PROMOIQ:PROMO-03",
+        "reason": "clean power duel that ends with the villain rattled; X opens strongly but is confusing without the poison subplot"
+      },
+      {
+        "pair": "P4",
+        "X": "PROMOIQ:PROMO-01",
+        "Y": "A0_keyword_window:A0-01",
+        "reviewer_choice": "PROMOIQ:PROMO-01",
+        "model_choice": "PROMOIQ:PROMO-01",
+        "reason": "Y starts and ends mid-line"
+      },
+      {
+        "pair": "P5",
+        "X": "PROMOIQ:PROMO-02",
+        "Y": "A0_keyword_window:A0-02",
+        "reviewer_choice": "PROMOIQ:PROMO-02",
+        "model_choice": "PROMOIQ:PROMO-02",
+        "reason": "Y spends its first 3 seconds on an establishing shot"
+      },
+      {
+        "pair": "P6",
+        "X": "A0_keyword_window:A0-03",
+        "Y": "PROMOIQ:PROMO-03",
+        "reviewer_choice": "PROMOIQ:PROMO-03",
+        "model_choice": "PROMOIQ:PROMO-03",
+        "reason": "X is cut mid-sentence at both ends"
+      }
+    ]
+  }
+}

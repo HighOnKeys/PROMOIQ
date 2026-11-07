@@ -1,0 +1,8 @@
+# Confidential screenplays: never listen on the network, never send telemetry.
+[server]
+address = "localhost"
+headless = true
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false

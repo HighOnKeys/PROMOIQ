@@ -1,0 +1,20 @@
+# --- CONFIDENTIAL: Kuku input pack and anything derived from it ---
+# The screenplays are Kuku's own content shared only for this assignment.
+data/
+*.zip
+Kuku*.pdf
+outputs/
+# outputs/ contains screenplay excerpts (events, candidates, evidence quotes, blind sheets).
+# Share it with Kuku through a private link only; never push it to a public repository.
+
+# secrets
+.env
+*.key
+
+# environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.claude/

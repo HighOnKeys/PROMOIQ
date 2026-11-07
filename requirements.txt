@@ -1,0 +1,20 @@
+# Core (offline pipeline)
+pydantic>=2.5
+pandas>=2.0
+numpy>=1.24,<2.0
+networkx>=3.0
+scikit-learn>=1.3          # TF-IDF fallback when sentence-transformers is unavailable
+sentence-transformers>=2.7,<4   # duplicate / similarity detection (all-MiniLM-L6-v2, ~90 MB, CPU ok)
+python-dotenv>=1.0
+
+# Interface
+streamlit>=1.30
+
+# Optional model providers (only needed if PROMOIQ_PROVIDER is set to one of them)
+google-generativeai>=0.8   # gemini
+anthropic>=0.40            # anthropic
+requests>=2.31             # openai_compat
+
+# Docs + tests
+reportlab>=4.0             # builds the 2-page solution PDF
+pytest>=7
