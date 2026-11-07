@@ -1,0 +1,228 @@
+{
+ "reviewer": "fresh Claude subagent (same model family as the build assistant); given only the source text of each clip (camera lines removed), shuffled, with system labels, scores and PROMOIQ explanations hidden. NOT a human rating.",
+ "scale": "1-5 per criterion; verdict POST/MAYBE/DROP as cut",
+ "summary": {
+  "offline": {
+   "n": 10,
+   "hook": 3.4,
+   "cliffhanger": 3.2,
+   "standalone": 3.5,
+   "POST": 3,
+   "MAYBE": 2,
+   "DROP": 5,
+   "in_reviewer_top5": 3
+  },
+  "gemini": {
+   "n": 10,
+   "hook": 3.0,
+   "cliffhanger": 4.1,
+   "standalone": 3.7,
+   "POST": 5,
+   "MAYBE": 2,
+   "DROP": 3,
+   "in_reviewer_top5": 2
+  }
+ },
+ "clips": [
+  {
+   "clip": "X20",
+   "system": "gemini",
+   "promo": "PROMO-01",
+   "hook": 4,
+   "cliffhanger": 4,
+   "standalone": 3,
+   "verdict": "POST",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X03",
+   "system": "gemini",
+   "promo": "PROMO-02",
+   "hook": 5,
+   "cliffhanger": 4,
+   "standalone": 4,
+   "verdict": "POST",
+   "reviewer_top5_rank": 4
+  },
+  {
+   "clip": "X18",
+   "system": "gemini",
+   "promo": "PROMO-03",
+   "hook": 3,
+   "cliffhanger": 5,
+   "standalone": 4,
+   "verdict": "POST",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X15",
+   "system": "gemini",
+   "promo": "PROMO-04",
+   "hook": 2,
+   "cliffhanger": 4,
+   "standalone": 3,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X09",
+   "system": "gemini",
+   "promo": "PROMO-05",
+   "hook": 3,
+   "cliffhanger": 5,
+   "standalone": 4,
+   "verdict": "POST",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X02",
+   "system": "gemini",
+   "promo": "PROMO-06",
+   "hook": 2,
+   "cliffhanger": 5,
+   "standalone": 4,
+   "verdict": "MAYBE",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X13",
+   "system": "gemini",
+   "promo": "PROMO-07",
+   "hook": 3,
+   "cliffhanger": 5,
+   "standalone": 4,
+   "verdict": "POST",
+   "reviewer_top5_rank": 5
+  },
+  {
+   "clip": "X01",
+   "system": "gemini",
+   "promo": "PROMO-08",
+   "hook": 2,
+   "cliffhanger": 4,
+   "standalone": 4,
+   "verdict": "MAYBE",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X04",
+   "system": "gemini",
+   "promo": "PROMO-09",
+   "hook": 3,
+   "cliffhanger": 4,
+   "standalone": 3,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X07",
+   "system": "gemini",
+   "promo": "PROMO-10",
+   "hook": 3,
+   "cliffhanger": 1,
+   "standalone": 4,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X10",
+   "system": "offline",
+   "promo": "PROMO-01",
+   "hook": 2,
+   "cliffhanger": 3,
+   "standalone": 4,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X17",
+   "system": "offline",
+   "promo": "PROMO-02",
+   "hook": 5,
+   "cliffhanger": 4,
+   "standalone": 4,
+   "verdict": "POST",
+   "reviewer_top5_rank": 3
+  },
+  {
+   "clip": "X16",
+   "system": "offline",
+   "promo": "PROMO-03",
+   "hook": 5,
+   "cliffhanger": 4,
+   "standalone": 5,
+   "verdict": "POST",
+   "reviewer_top5_rank": 1
+  },
+  {
+   "clip": "X08",
+   "system": "offline",
+   "promo": "PROMO-04",
+   "hook": 4,
+   "cliffhanger": 2,
+   "standalone": 3,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X19",
+   "system": "offline",
+   "promo": "PROMO-05",
+   "hook": 2,
+   "cliffhanger": 2,
+   "standalone": 3,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X12",
+   "system": "offline",
+   "promo": "PROMO-06",
+   "hook": 4,
+   "cliffhanger": 4,
+   "standalone": 5,
+   "verdict": "POST",
+   "reviewer_top5_rank": 2
+  },
+  {
+   "clip": "X06",
+   "system": "offline",
+   "promo": "PROMO-07",
+   "hook": 2,
+   "cliffhanger": 4,
+   "standalone": 3,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X05",
+   "system": "offline",
+   "promo": "PROMO-08",
+   "hook": 4,
+   "cliffhanger": 3,
+   "standalone": 4,
+   "verdict": "MAYBE",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X14",
+   "system": "offline",
+   "promo": "PROMO-09",
+   "hook": 4,
+   "cliffhanger": 3,
+   "standalone": 2,
+   "verdict": "MAYBE",
+   "reviewer_top5_rank": null
+  },
+  {
+   "clip": "X11",
+   "system": "offline",
+   "promo": "PROMO-10",
+   "hook": 2,
+   "cliffhanger": 3,
+   "standalone": 2,
+   "verdict": "DROP",
+   "reviewer_top5_rank": null
+  }
+ ]
+}

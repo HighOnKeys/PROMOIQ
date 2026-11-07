@@ -84,15 +84,16 @@
   "run": {
     "validated": {
       "offline": 1243,
-      "llm": 2341
+      "llm": 2340
     },
     "rejected": {
       "offline": 2124,
-      "llm": 1040
+      "llm": 1041
     },
     "reject_reasons": {
       "offline": {
         "weak cliffhanger": 1765,
+        "ending leaves no open question": 1765,
         "weak hook": 669,
         "spoiler risk": 92,
         "not standalone": 14,
@@ -100,6 +101,7 @@
       },
       "llm": {
         "weak hook": 601,
+        "ending leaves no open question": 306,
         "weak cliffhanger": 305,
         "spoiler risk": 153,
         "hard:hook_evidence_first_3s": 152,
@@ -108,8 +110,8 @@
       }
     },
     "total_s": {
-      "offline": 21.5,
-      "llm": 767.09
+      "offline": 15.95,
+      "llm": 12.36
     },
     "models": {
       "offline": {
@@ -124,12 +126,17 @@
       }
     },
     "llm_judging": {
-      "offline": null,
+      "offline": {
+        "budget": 0,
+        "selected": 0,
+        "judged_ok": 0,
+        "ranking_pool": 1243
+      },
       "llm": {
         "budget": 19,
         "selected": 19,
         "judged_ok": 19,
-        "ranking_pool": 14
+        "ranking_pool": 13
       }
     }
   },
@@ -144,36 +151,13 @@
       "by_task": {}
     },
     "judge": {
-      "calls": 20,
-      "cache_hits": 18,
+      "calls": 0,
+      "cache_hits": 38,
       "failures": 0,
-      "approx_input_tokens": 29629,
-      "approx_output_tokens": 5691,
-      "seconds": 754.07,
-      "by_task": {
-        "cold_viewer:C-63e0d57d": 1,
-        "integrity:C-63e0d57d": 1,
-        "cold_viewer:C-7cb1043d": 1,
-        "integrity:C-7cb1043d": 1,
-        "cold_viewer:C-38d331ed": 1,
-        "integrity:C-38d331ed": 1,
-        "cold_viewer:C-14ce82eb": 1,
-        "integrity:C-14ce82eb": 1,
-        "cold_viewer:C-690ebec0": 1,
-        "integrity:C-690ebec0": 1,
-        "cold_viewer:C-06779e7f": 1,
-        "integrity:C-06779e7f": 1,
-        "cold_viewer:C-b6cbfd82": 1,
-        "integrity:C-b6cbfd82": 1,
-        "cold_viewer:M-aa1b523d": 1,
-        "integrity:M-aa1b523d": 1,
-        "cold_viewer:C-185705cc": 1,
-        "integrity:C-185705cc": 1,
-        "cold_viewer:C-89ec0a13": 1,
-        "integrity:C-89ec0a13": 1
-      },
-      "reported_input_tokens": 34657,
-      "reported_output_tokens": 5932
+      "approx_input_tokens": 0,
+      "approx_output_tokens": 0,
+      "seconds": 0.0,
+      "by_task": {}
     }
   },
   "shortlist_overlap": {
@@ -264,9 +248,9 @@
       {
         "llm_promo": "PROMO-10",
         "episodes": [
-          2
+          29
         ],
-        "theme": "confrontation",
+        "theme": "action",
         "best_offline_match": null,
         "overlap": 0.0
       }
@@ -285,7 +269,6 @@
       44
     ],
     "episodes_llm": [
-      2,
       3,
       12,
       23,
@@ -303,10 +286,11 @@
     "mean_llm_clarity": 6.21,
     "answered_inside_promo": 1,
     "not_faithful_to_source": 0,
-    "rejected_after_llm_judging": 5,
+    "rejected_after_llm_judging": 6,
     "gate_failures": {
       "not standalone": 3,
-      "spoiler risk 7.0": 2
+      "spoiler risk 7.0": 2,
+      "ending leaves no open question": 1
     },
     "example_missing_information": [
       "The nature of their relationship",

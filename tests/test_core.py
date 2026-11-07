@@ -235,6 +235,58 @@ def test_ranked_promos_are_valid_and_unique(tiny_show):
 
 
 # --------------------------------------------------------------------- ranking
+def test_heuristic_cold_viewer_claims_only_what_is_on_screen(tiny_show):
+    """Stakes must be a spoken line (never a camera direction); a named conflict must be a known antagonistic pair.
+    Worst case forced: camera lines carry the highest stakes/conflict signals and the show has no known conflicts."""
+    from src.evaluation.judges import ColdViewerJudge
+
+    res, _ = tiny_show
+    show = res["show"]
+    camera = [e for e in show.events.values() if e.event_type == "camera"]
+    assert camera
+    for e in camera:
+        sg = show.timelines[e.episode].signals[e.event_id]
+        sg.S, sg.C, sg.E = 5.0, 5.0, 5.0
+    camera_text = {e.text[:160] for e in camera}
+    saved, show.conflicts = show.conflicts, {}
+    try:
+        judge = ColdViewerJudge(show, None)
+        for c in res["candidates"][:40]:
+            r = judge.judge(c)
+            assert r.why_it_matters not in camera_text
+            assert r.what_is_happening not in camera_text
+            assert r.central_conflict == "not explicit on screen"
+    finally:
+        show.conflicts = saved
+
+
+def test_judge_saying_no_open_question_rejects_candidate(tmp_path, monkeypatch):
+    """A high generator cliffhanger score must not outweigh the integrity judge's verdict that nothing is left open."""
+    from src.evaluation import judges
+    from src.pipeline import run
+
+    orig = judges.IntegrityJudge._heuristic
+
+    def no_question(self, p):
+        r = orig(self, p)
+        r.ending_leaves_question = False
+        return r
+
+    monkeypatch.setattr(judges.IntegrityJudge, "_heuristic", no_question)
+    d = tmp_path / "Test Show-scripts"
+    d.mkdir()
+    for n in (1, 2, 3):
+        (d / f"episode-00{n}-Episode {n}.txt").write_text(SCRIPT.replace("Episode 1", f"Episode {n}"))
+    st = get_settings()
+    st.model.provider = "heuristic"
+    st.model.judge_provider = ""
+    st.model.cache_dir = tmp_path / "cache"
+    res = run(d, settings=st, out_root=tmp_path / "out")
+    assert not res["ranked"]
+    rejected = json.loads((tmp_path / "out/processed/rejected_candidates.json").read_text())
+    assert rejected and all(any("no open question" in r for r in x["reasons"]) for x in rejected)
+
+
 def test_mmr_prefers_diverse_item():
     from src.ranking.portfolio import mmr_shortlist
     from src.schemas import PromoCandidate, Segment

@@ -97,14 +97,21 @@ class ColdViewerJudge:
         from collections import Counter
         speakers = [show.characters.get(c, {}).get("name", c) for c, _ in Counter(e.speaker for e in dlg).most_common(4)]
         sig = lambda e: show.timelines[e.episode].signals[e.event_id]
-        top = max(evs, key=lambda e: sig(e).C + sig(e).S + sig(e).E) if evs else None
-        stake = max(evs, key=lambda e: sig(e).S) if evs else None
+        # a viewer sees action and hears dialogue/sound; camera directions are production notes, not story
+        seen = [e for e in evs if e.event_type != "camera"]
+        top = max(seen, key=lambda e: sig(e).C + sig(e).S + sig(e).E) if seen else None
+        # stakes count only when a character says them
+        stake = max(dlg, key=lambda e: sig(e).S) if dlg else None
         qs = [e for e in dlg if "?" in e.text]
         c_score, missing = clarity(show, segs)
+        # name a conflict only if it is a known antagonistic pair (hostility > warmth) and both speak in the promo
+        spk = {e.speaker for e in dlg}
+        in_promo = {b for s in p.segments for b in s.beat_ids}
+        known = [cf for cf in show.conflicts.values() if set(cf["characters"]) <= spk]
         conflict_pair = ""
-        if top and top.event_type == "dialogue":
-            others = [s for s in speakers if s != show.characters.get(top.speaker, {}).get("name", top.speaker)]
-            conflict_pair = f"{show.characters.get(top.speaker, {}).get('name', top.speaker)} vs {others[0]}" if others else ""
+        if known:
+            cf = max(known, key=lambda cf: (sum(st["beat_id"] in in_promo for st in cf["events"]), len(cf["events"])))
+            conflict_pair = " vs ".join(show.characters.get(c, {}).get("name", c) for c in cf["characters"])
         return ColdViewerResult(
             main_characters=speakers,
             what_is_happening=(top.text[:160] if top else ""),

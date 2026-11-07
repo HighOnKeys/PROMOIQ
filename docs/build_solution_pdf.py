@@ -131,8 +131,10 @@ for r in ranked["promos"][:6]:
                  f"{r['scores']['cliffhanger']:.1f}", f"{r['scores']['clarity']:.1f}", r["why_it_works"]])
 story += [table(rows, [W * .03, W * .25, W * .05, W * .045, W * .045, W * .045, W * .535])]
 story += [P("The full list of 10, plus multi-segment PROMO-09 (E42 → E44) and the held-back alternatives, is in "
-            "outputs/final/ranked_promos.csv / .json and editorial_report.md. #1 opens on an accusation and cuts as "
-            "the villain turns the scene against the heroine.", small)]
+            "outputs/final/ranked_promos.csv / .json and editorial_report.md. #1 opens on an accusation and cuts on the villain's "
+            "\"You hear that?!\", one line before her twist; a blind reviewer would extend it 3.9 s (failure 6, page 2). The "
+            "\"why it works\" lines are generated from scores and labels, so they are generic, and theme labels come from keywords: "
+            "#5 is labelled romance because a dungeon taunt mentions love.", small)]
 
 story += [PageBreak()]
 
@@ -178,9 +180,11 @@ if cmp and gbench:
         "in the first 3 s. "
         f"<b>Judges:</b> the LLM cold viewer called {lj['standalone_false']}/{lj['judged']} candidates not standalone. That confirms the offline "
         "proxy is too lenient, but its reasons were mostly backstory a promo should withhold. "
-        f"<b>Result:</b> 10 promos from 10 episodes, with no near-duplicates; one is the offline #1 (E27). Day 1's 9 judged candidates had "
-        "given 5 promos from one arc, so the narrowness came from the small pool. A different judge, not a "
-        "better-calibrated one; only human review can settle which is better.", small)]
+        f"<b>Result:</b> 10 promos from 9 episodes; one shares the offline #1's scene but runs 3.9 s longer, to include its twist line. "
+        "Day 1's 9 judged candidates had given 5 promos from one arc, so the narrowness came from the small pool. "
+        "<b>Blind review 2</b> (final audit: a fresh AI reviewer saw only the source text of all 20 clips, labels and explanations hidden; "
+        "same model family as my coding assistant, not a human): offline hooks 3.4 vs Gemini 3.0/5, endings 3.2 vs 4.1, "
+        "postable as cut 3 vs 5 of 10. Neither list dominates; only human review can settle it.", small)]
 
 story += [P("Where it picks badly (real failures from this build)", h2), P(
     "<b>1. Allies labelled as rivals.</b> The first conflict detector made the romantic leads the show's biggest \"conflict\" (32 events) "
@@ -194,7 +198,11 @@ story += [P("Where it picks badly (real failures from this build)", h2), P(
     "another pick. I kept the rule rather than overfit to my own review, and now surface such alternatives. "
     "<b>5. Open issues.</b> The offline clarity proxy passes every system at 100%, so it does not discriminate. It also missed an "
     "off-screen \"she\" that the whole promo hinges on; the LLM judge is stricter but muddles legibility with backstory. "
-    "See evaluation/failure_analysis.md (19 cases, including 8 from the live Gemini run).")]
+    "<b>6. Found in the final audit.</b> The offline #1 ends one line before the scene's twist: the boundary check tried the longer "
+    "cut, but the cliffhanger scorer rates a question mark (9.37) above an accusation (7.98); not changed, so as not to ship an "
+    "unvalidated ranking. A Gemini pick ended on a resolution that its own judge had flagged, and the gates ignored that verdict; it is "
+    "now a gate (offline shortlist unchanged). Both lists repeat a payoff across episodes, which the duplicate check misses. "
+    "See evaluation/failure_analysis.md (25 cases: 8 from the live Gemini run, 6 from the final audit).")]
 
 story += [P("Scale and cost", h2), P(
     "Offline: ~20 s per 50-episode show on one laptop CPU, with no API cost. Shows are independent, so weekly releases parallelise "

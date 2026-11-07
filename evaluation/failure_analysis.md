@@ -8,6 +8,7 @@ How failures were found:
 - (M) **Manual inspection**: I read the full text of every shortlisted promo after each run.
 - (B) **Blind review**: round 1, 18 clips and 6 pairs with system labels hidden.
 - (T) **Tests and measurement.**
+- (A) **Final audit**: an independent re-check against the raw files, plus blind review round 2 (an AI reviewer, see `evaluation_report.md`).
 
 | # | Failure | Found by | Status |
 |---|---|---|---|
@@ -194,10 +195,10 @@ All 70 quotes that aren't verbatim are flagged; none is silently trusted.
   - 2 of the 5 were same-scene near-duplicates (near-duplicate rate 20%, against 0% offline).
   - None of them overlapped the offline shortlist.
 - **Round 2.** After the daily reset, 10 more candidates were judged: 20 new calls, while the first 9 came from cache. A dry run with the live call stubbed out confirmed that count before any quota was spent.
-  - 5 of the 19 failed the gates (3 not standalone, 2 spoiler risk).
-  - The shortlist is now **10** promos from **10 episodes** (E2, 3, 12, 23, 27–32), with **0%** near-duplicates.
-  - One pick is exactly the offline #1 (E27).
-  - So the single-arc result was mostly an artefact of the small judged pool. 6 of the 10 picks still come from episodes 27–32.
+  - 5 of the 19 failed the gates (3 not standalone, 2 spoiler risk), and the final-audit gate (§21) later rejected a sixth.
+  - The shortlist is now **10** promos from **9 episodes** (E3, 12, 23, 27, 28, 29 ×2, 30, 31, 32).
+  - One pick shares the offline #1's start (E27) and ends 3.9 s later.
+  - So the single-arc result was mostly an artefact of the small judged pool. 7 of the 10 picks still come from episodes 27–32.
 - **What is still open.** 19 candidates is below the 30+ I would judge on a paid tier (`PROMOIQ_JUDGE_BUDGET`). The cache makes the run resumable day by day.
 - **Other costs.**
   - Judging took **13 min** for 20 calls, about 38 s per call including the 13 s pacing. The whole offline run takes about 20 s.
@@ -217,3 +218,66 @@ All 70 quotes that aren't verbatim are flagged; none is silently trusted.
   - Round 1 lost 38 calls to failure 14 and then to the quota.
   - Round 2 added episodes 13–28.
   - Episode 29's answer failed validation, and the retry hit the daily cap.
+
+# Final audit (independent re-check, added last)
+
+Found by re-checking every recommended promo against the raw screenplay files with a separate parser
+(`evaluation/verify_against_source.py`), a clean install from `requirements.txt`, and blind review round 2.
+The mechanical checks all passed:
+- 20 shortlisted promos and 7 alternatives, across both runs.
+- Every cut is a real source timestamp, no cut splits a line, every duration is 20–60 s, and every evidence quote is in its cited block.
+
+The failures below are about judgment and packaging.
+
+| # | Failure | Found by | Status |
+|---|---|---|---|
+| 20 | Offline #1 ends one line before its payoff | A (blind review 2) | Open: scorer change not re-validated |
+| 21 | A Gemini pick ends on a resolution; the judge said so and the gates ignored it | A (blind review 2) | Fixed: the judge's verdict is now a gate |
+| 22 | Same payoff repeated across episodes slips past duplicate detection | A (blind review 2) | Open |
+| 23 | Heuristic explanations quoted camera directions as stakes and invented "X vs Y" conflicts | A (reading outputs) | Fixed + test |
+| 24 | `requirements.txt` named the legacy Gemini SDK | A (clean install) | Fixed |
+| 25 | ZIP upload check used a string prefix | A (code read) | Fixed |
+
+## 20. The offline #1 ends one line before its payoff (open)
+- **What happened.** PROMO-01 (E27, 01:32.80–02:04.60) ends on the line "You hear that?!". The next line, 1.7 s later, is the twist: the villain turns Juliana's words into a confession. The blind reviewer dropped the clip. The Gemini run's version of the same scene ends 3.9 s later and includes the twist; the reviewer rated it cliffhanger 5/5.
+- **Why.** The tool did test this ending: the "later ending" boundary counterfactual (02:08.50) is in `ranked_promos.json`. But the offline cliffhanger scorer gave the question mark 9.37 and the accusation 7.98, so it kept the shorter cut. The scorer rewards a literal question more than a reveal that creates one.
+- **Proposed fix (not applied).** Score a reversal or accusation in the last line at least as high as a question, then re-run the blind review. I have not changed the scorer this late, because it would change the shortlist with no time to re-validate it.
+
+## 21. A Gemini pick ended on a resolution, and the gates ignored the judge that said so (fixed)
+- **What happened.** Gemini PROMO-10 (E2) ended on Juliana's defiant exit line while the score swells. The scene's conflict is resolved and nothing is left open.
+- **Why.** Gemini's integrity judge had already said so: `ending_leaves_question = false` and `answered_inside_promo = true`. But the gates read only the generator's cliffhanger score (9.39, inflated, §16), and "answered inside" cost only 0.4 points. So a judge verdict that the promo breaks the brief's cliffhanger rule was computed and then outweighed. That contradicts the rule that hard failures can't be bought back with high scores.
+- **Fix.**
+  - The judge saying the ending leaves no open question is now a gate.
+  - "Answered inside" stays a soft penalty, because the heuristic judge flags it on 482 offline candidates and is too noisy to gate on.
+- **Effect.**
+  - Offline: no candidate affected, and the shortlist is byte-identical.
+  - Gemini, re-run entirely from cache with 0 new calls: exactly this candidate is rejected. An E29 clip (00:56.60–01:28.80) enters at #10, which puts two E29 clips from the same scene on the list (near-duplicates 10%).
+  - A test checks that the judge's verdict rejects candidates. It fails on the old code.
+
+## 22. The same payoff repeated across episodes slips past duplicate detection (open)
+- **What happened.** Both shortlists report 0% near-duplicates, yet:
+  - Gemini PROMO-04 and PROMO-08 both end on the "call it witchcraft" threat (E30, E29).
+  - Gemini PROMO-03 and PROMO-05 share the dungeon iron threat (E32, E31).
+  - Offline PROMO-04 and PROMO-05 turn on the same "beauty, money, family" taunt (E32, E31).
+- **Why.** Duplicate detection compares time overlap, shared beats, the same scene and whole-promo semantic similarity. It does not compare the *endings* of promos from different episodes, where a series repeats its own beats.
+- **Proposed fix.** Add an ending-similarity term: embed the last line or beat of each promo and penalise shared payoffs in the diversity pass.
+
+## 23. Heuristic explanations quoted camera directions and invented conflicts (fixed)
+- **What happened.** In the offline `ranked_promos.json`:
+  - The heuristic cold viewer's `why_it_matters` was a camera direction for 5 of 10 promos (for example "Low-angle shot of Catherine…").
+  - Its `central_conflict` paired any two speakers, such as "Prudence vs Juliana" for a maid warning her mistress.
+- **Fix.**
+  - Stakes now come only from spoken lines.
+  - "What is happening" ignores camera directions.
+  - A conflict is named only if it is a known antagonistic pair (hostility > warmth) and both characters speak in the promo; otherwise "not explicit on screen".
+  - These are display fields, so no score changed. The re-run's shortlist, alternatives, candidates and gates are byte-identical apart from those fields.
+  - A test now forces the worst case (camera lines carrying the top stakes signal). It fails on the old code and passes on the new.
+
+## 24. `requirements.txt` named the legacy Gemini SDK (fixed)
+- **What happened.** The live run used `google-genai`, but `requirements.txt` listed only `google-generativeai`. A clean install would have run the Gemini path on the untested legacy fallback.
+- **Fix.** The requirement is now `google-genai>=1.0`. A fresh venv install, the test suite and the offline pipeline were all re-run from a clean copy of the tracked files.
+
+## 25. The ZIP upload check used a string prefix (fixed)
+- **What happened.** The app rejected ZIP entries outside the upload folder with `str(target).startswith(folder)`. An entry like `../uploaded_show_evil/x.txt` passed that check.
+- **Fix.** It now uses `Path.is_relative_to`.
+

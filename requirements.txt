@@ -11,7 +11,7 @@ python-dotenv>=1.0
 streamlit>=1.30
 
 # Optional model providers (only needed if PROMOIQ_PROVIDER is set to one of them)
-google-generativeai>=0.8   # gemini
+google-genai>=1.0          # gemini (the SDK the live run used; the legacy google-generativeai is only a fallback)
 anthropic>=0.40            # anthropic
 requests>=2.31             # openai_compat
 

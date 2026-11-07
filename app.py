@@ -69,7 +69,8 @@ def _prepare_input() -> Path | None:
             with zipfile.ZipFile(io.BytesIO(f.getvalue())) as z:
                 for m in z.infolist():
                     target = (show_dir / m.filename).resolve()
-                    if not str(target).startswith(str(show_dir.resolve())):
+                    # is_relative_to, not a string prefix: ".../uploaded_show_evil" starts with ".../uploaded_show"
+                    if not target.is_relative_to(show_dir.resolve()):
                         st.error(f"Unsafe path in ZIP: {m.filename}")
                         return None
                 z.extractall(show_dir)

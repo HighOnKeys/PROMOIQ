@@ -1,5 +1,5 @@
 {
-  "baseline_A_llm_only": "ran with gemini:gemini-3.6-flash: 28 promos from 32 episodes, 4 failed calls, 0 unparseable timestamps",
+  "baseline_A_llm_only": "ran with gemini:gemini-3.6-flash: 28 promos from 28 episodes, 0 failed calls, 0 unparseable timestamps",
   "systems": {
     "PROMOIQ": {
       "n": 10,
@@ -9,13 +9,13 @@
       "hook_pass_%": 100.0,
       "cliffhanger_pass_%": 100.0,
       "standalone_pass_%": 100.0,
-      "mean_hook": 8.6,
-      "mean_cliff": 9.69,
+      "mean_hook": 8.65,
+      "mean_cliff": 9.67,
       "mean_clarity": 8.75,
       "mean_coherence": 9.1,
       "spoiler_flag_%": 0.0,
-      "near_duplicate_%": 0.0,
-      "processing_s": 767.09,
+      "near_duplicate_%": 10.0,
+      "processing_s": 12.37,
       "model_calls": 0,
       "approx_cost_usd": 0.0
     },
@@ -69,9 +69,9 @@
       "mean_coherence": 9.0,
       "spoiler_flag_%": 0.0,
       "near_duplicate_%": 0.0,
-      "processing_s": 299.07,
-      "model_calls": 17,
-      "approx_cost_usd": null
+      "processing_s": 0.0,
+      "model_calls": 0,
+      "approx_cost_usd": 0.0
     }
   },
   "per_clip": {
@@ -282,12 +282,12 @@
       {
         "clip_id": "PROMO-10",
         "system": "PROMOIQ",
-        "duration": 51.4,
+        "duration": 32.2,
         "segments": [
           [
-            2,
-            58.6,
-            110.0
+            29,
+            56.6,
+            88.8
           ]
         ],
         "duration_ok": true,
@@ -295,8 +295,8 @@
         "timestamps_are_source": true,
         "no_midline_cut": true,
         "midline_cuts": 0,
-        "hook": 7.58,
-        "cliff": 9.39,
+        "hook": 8.05,
+        "cliff": 9.2,
         "clarity": 9.0,
         "coherence": 9.0,
         "spoiler": 0.0
@@ -983,9 +983,9 @@
     "mean_coherence": 8.91,
     "spoiler_flag_%": 0.0,
     "near_duplicate_%": 0.0,
-    "processing_s": 299.07,
-    "model_calls": 17,
-    "approx_cost_usd": null,
+    "processing_s": 0.0,
+    "model_calls": 0,
+    "approx_cost_usd": 0.0,
     "note": "all promos the LLM returned (one per episode), not just its top 10"
   }
 }

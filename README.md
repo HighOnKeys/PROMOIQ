@@ -26,13 +26,18 @@ pip install -r requirements.txt
    ```
 3. Run the tests:
    ```bash
-   python -m pytest -q                         # 31 tests (synthetic fixtures, no Kuku content)
+   python -m pytest -q                         # 33 tests (synthetic fixtures, no Kuku content)
    ```
 4. Compare against the baselines and build the blind review sheets:
    ```bash
    python -m evaluation.benchmark              # baselines + metrics + blind review sheets
    ```
-5. Open the editorial app:
+5. Re-check every recommended promo against the raw screenplays. This uses its own parser, not PROMOIQ's:
+   ```bash
+   python -m evaluation.verify_against_source --input data/input outputs/final/ranked_promos.json
+   ```
+   It checks that every cut is a real timestamp, that no line is split, that durations are 20–60 s, and that every evidence quote is in its cited block. It exits with code 1 on any problem.
+6. Open the editorial app:
    ```bash
    streamlit run app.py                        # local editorial UI (bound to localhost)
    ```
@@ -134,7 +139,7 @@ The benchmark compares the systems on one set of metrics. Results are in `evalua
 - **B:** independent event ranking, using PROMOIQ's own features but no sequence reasoning.
 - **A:** LLM-only extraction, run on Gemini for 28 of 50 episodes (`evaluation/results/gemini/`).
 
-Blind review round 1 (18 clips, 6 pairs) was rated by the AI coding assistant. It is **not** a human rating, and the reviewer built the system. See `evaluation/human_eval/` for a template to collect human ratings. Failures and fixes are in `evaluation/failure_analysis.md`.
+Blind review round 1 (18 clips, 6 pairs) was rated by the AI coding assistant. It is **not** a human rating, and the reviewer built the system. Round 2, in the final audit, gave the offline and Gemini top 10s to a fresh AI reviewer. That reviewer saw only the source text, with labels and explanations hidden; it is still not human. Results are in `evaluation/evaluation_report.md` and failure cases 20–25. See `evaluation/human_eval/` for a template to collect human ratings. Failures and fixes are in `evaluation/failure_analysis.md`.
 
 ## Confidentiality
 

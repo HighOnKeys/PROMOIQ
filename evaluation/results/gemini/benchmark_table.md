@@ -8,8 +8,8 @@
 | standalone_pass_% | 100.0 | 100.0 | 100.0 | 100.0 |
 | mean_coherence | 9.1 | 9.0 | 9.0 | 9.0 |
 | spoiler_flag_% | 0.0 | 20.0 | 0.0 | 0.0 |
-| near_duplicate_% | 0.0 | 20.0 | 30.0 | 0.0 |
-| processing_s | 767.09 | 0.02 | 0.0 | 299.07 |
-| model_calls | 0 | 0 | 0 | 17 |
+| near_duplicate_% | 10.0 | 20.0 | 30.0 | 0.0 |
+| processing_s | 12.37 | 0.02 | 0.0 | 0.0 |
+| model_calls | 0 | 0 | 0 | 0 |
 
-Baseline A (LLM-only): ran with gemini:gemini-3.6-flash: 28 promos from 32 episodes, 4 failed calls, 0 unparseable timestamps.
+Baseline A (LLM-only): ran with gemini:gemini-3.6-flash: 28 promos from 28 episodes, 0 failed calls, 0 unparseable timestamps.
