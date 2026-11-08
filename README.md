@@ -50,8 +50,9 @@ pip install -r requirements.txt                       # first run also downloads
    It checks that every cut is a real timestamp, that no line is split, that durations are 20–60 s, and that every evidence quote is in its cited block. It exits with code 1 on any problem.
 6. Open the editorial app:
    ```bash
-   streamlit run app.py                        # local editorial UI (bound to localhost)
+   python -m streamlit run app.py              # local editorial UI (bound to localhost)
    ```
+   Use `python -m streamlit`, not plain `streamlit`. Plain `streamlit` can resolve to another environment's copy (for example conda base) that lacks sentence-transformers. The app then falls back to TF-IDF similarity, gives different results, and shows a warning.
 
 To run on a new show, point `--input` at its folder or ZIP:
 

@@ -237,6 +237,7 @@ The failures below are about judgment and packaging.
 | 23 | Heuristic explanations quoted camera directions as stakes and invented "X vs Y" conflicts | A (reading outputs) | Fixed + test |
 | 24 | `requirements.txt` named the legacy Gemini SDK | A (clean install) | Fixed |
 | 25 | ZIP upload check used a string prefix | A (code read) | Fixed |
+| 26 | App crashed when sentence-transformers was missing | Rehearsal (crash in the app) | Fixed + test |
 
 ## 20. The offline #1 ends one line before its payoff (open)
 - **What happened.** PROMO-01 (E27, 01:32.80–02:04.60) ends on the line "You hear that?!". The next line, 1.7 s later, is the twist: the villain turns Juliana's words into a confession. The blind reviewer dropped the clip. The Gemini run's version of the same scene ends 3.9 s later and includes the twist; the reviewer rated it cliffhanger 5/5.
@@ -281,4 +282,16 @@ The failures below are about judgment and packaging.
 ## 25. The ZIP upload check used a string prefix (fixed)
 - **What happened.** The app rejected ZIP entries outside the upload folder with `str(target).startswith(folder)`. An entry like `../uploaded_show_evil/x.txt` passed that check.
 - **Fix.** It now uses `Path.is_relative_to`.
+
+## 26. The app crashed when sentence-transformers was missing (fixed)
+- **What happened.** While rehearsing the walkthrough, the app crashed during ranking with `ValueError: shapes (1639,) and (1632,) not aligned`.
+  - `streamlit run app.py` had started conda base's `streamlit`. The project `.venv` has no `streamlit` command of its own, and conda base has no sentence-transformers.
+  - So similarity fell back to TF-IDF. That path had never been run on the full pack: every test and every earlier app run had sentence-transformers available.
+- **Why it crashed.** The TF-IDF fallback refitted its vocabulary every time new segments arrived (1,632 words, then 1,639). Promo vectors cached before a refit could no longer be compared with later ones.
+- **Fix.**
+  - TF-IDF is fitted once, on every beat of the show, so the vector length never changes during a run.
+  - The app now warns when it is running on the fallback.
+  - The README and the walkthrough script use `python -m streamlit`, which runs the project's own Python.
+  - A test forces the fallback and primes similarity in two batches. It fails on the old code.
+- **Effect.** On the same setup, the full pack now completes, and all 10 promos pass the source verifier. But TF-IDF similarity gives a different run: 1,248 validated instead of 1,243, and 7 of the same 10 promos. So the documented results assume sentence-transformers.
 

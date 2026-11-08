@@ -28,7 +28,7 @@ Every number below comes from a command run during this audit.
 | Per promo: episode and start/end of every segment, in order | Done | `outputs/final/ranked_promos.json` / `.csv`; verified against source (§2) |
 | Hook, cliffhanger, one line on why it works | Done, but the "why" is weak | Present for all 10. The "why it works" line is generated from a template and generic; theme labels come from keywords (§4) |
 | Rank them: which to post first, and why | Done | Ranked by quality after a diversity pass; PDF page 1 table; `editorial_report.md` |
-| Check quality: where it picks badly | Done | `evaluation/failure_analysis.md` (25 cases), `evaluation_report.md`, blind reviews 1 and 2 |
+| Check quality: where it picks badly | Done | `evaluation/failure_analysis.md` (26 cases), `evaluation_report.md`, blind reviews 1 and 2 |
 | Solution doc: PDF, ≤ 2 pages | Done | `docs/PROMOIQ_solution.pdf`, 2 A4 pages (rendered and checked) |
 | Doc covers problem and why, assumptions, how it works, scale, how you know it's good incl. failures | Done | PDF sections, in that order |
 | Doc names the AI tools used and one place they got it wrong | Done | PDF "AI tools used" |
@@ -200,4 +200,21 @@ A last read of every deliverable, as a reviewer would open it, found these probl
 Still yours to do:
 - ~~Add your name and roll number to the PDF.~~ Done: the PDF header and its metadata now give Kumar Manas, roll no. 23119016, kumar_m@me.iitr.ac.in.
 - **Leave stale folders out of the raw-outputs share.** `outputs/app_run/` is an app run from 07:36, before today's fixes, and `outputs/history/` holds old snapshots.
+
+## 11. Addendum: crash found while rehearsing the walkthrough
+
+**The crash.** The app crashed when started with plain `streamlit run app.py`. That command ran conda base's Streamlit, which has no sentence-transformers, so similarity fell back to TF-IDF. The fallback refitted its vocabulary whenever new segments arrived, so cached vectors stopped matching later ones: `shapes (1639,) and (1632,) not aligned`.
+
+**The audit missed it.** Every test and app run in the audit used the project's own Python, where sentence-transformers is installed, so the fallback was never exercised.
+
+**Fixed:**
+- TF-IDF is fitted once per show.
+- The app warns when it runs on the fallback.
+- The README and walkthrough use `python -m streamlit`.
+- A test fails on the old code.
+
+**Effect on the documented results.**
+- The fallback now completes on the full pack, and its promos pass the source verifier.
+- It is a different run: 1,248 validated, and 7 of the same 10 promos. The documented results assume sentence-transformers.
+- That run is unchanged: the shortlist is identical, and 35 tests pass. See failure case 26.
 

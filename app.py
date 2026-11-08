@@ -115,6 +115,10 @@ with tabs[0]:
     c[4].metric("Run time", f"{meta['total_s']:.1f}s")
     st.caption(f"Models: generator={meta['models']['generator']}, judge={meta['models']['judge']}, "
                f"similarity={meta['models']['embeddings']}")
+    if meta["models"]["embeddings"] == "tfidf":
+        st.warning("sentence-transformers is not installed in the Python running this app, so similarity fell back to "
+                   "TF-IDF and results differ from the documented run. Start the app with the project's Python: "
+                   "`python -m streamlit run app.py` inside the activated .venv.")
     left, right = st.columns(2)
     with left:
         st.subheader("Characters")

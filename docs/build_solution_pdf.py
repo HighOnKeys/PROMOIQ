@@ -204,7 +204,7 @@ story += [P("Where it picks badly (real failures from this build)", h2), P(
     "cut, but the cliffhanger scorer rates a question mark (9.37) above an accusation (7.98); not changed, so as not to ship an "
     "unvalidated ranking. A Gemini pick ended on a resolution that its own judge had flagged, and the gates ignored that verdict; it is "
     "now a gate (offline shortlist unchanged). Both lists repeat a payoff across episodes, which the duplicate check misses. "
-    "See evaluation/failure_analysis.md (25 cases: 8 from the live Gemini run, 6 from the final audit).")]
+    "See evaluation/failure_analysis.md (26 cases: 8 from the live Gemini run, 7 from the final audit and rehearsal).")]
 
 story += [P("Scale and cost", h2), P(
     "Offline: ~20 s per 50-episode show on one laptop CPU, with no API cost. Shows are independent, so weekly releases parallelise "

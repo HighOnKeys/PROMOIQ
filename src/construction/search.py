@@ -65,6 +65,19 @@ class SegmentSimilarity:
             log.warning("sentence-transformers unavailable (%s); using TF-IDF", exc)
             self._model = "tfidf"
             self.backend = "tfidf"
+            self._fit_tfidf()
+
+    def _fit_tfidf(self) -> None:
+        """Fit TF-IDF ONCE on every beat of the show, so the vocabulary (and the vector length) never
+        changes during a run. Refitting whenever new segments arrived grew the vocabulary, and vectors
+        cached before a refit could no longer be compared with later ones (shape mismatch)."""
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
+        docs = [self.text((ep, k, k)) for ep, tl in self.show.timelines.items() for k in range(len(tl.beats))]
+        try:
+            self._tfidf = TfidfVectorizer(stop_words="english").fit(docs)
+        except ValueError:  # every word was a stop word (tiny inputs)
+            self._tfidf = TfidfVectorizer().fit(docs)
 
     def prime(self, segs) -> None:
         self._load()
@@ -73,12 +86,8 @@ class SegmentSimilarity:
             return
         texts = [self.text(s) for s in todo]
         if self._model == "tfidf":
-            from sklearn.feature_extraction.text import TfidfVectorizer
-
-            allsegs = list(self._vec) + todo
-            vec = TfidfVectorizer(stop_words="english").fit([self.text(s) for s in allsegs])
-            for s in allsegs:
-                v = vec.transform([self.text(s)]).toarray()[0]
+            m = self._tfidf.transform(texts).toarray()
+            for s, v in zip(todo, m):
                 self._vec[tuple(s)] = v / (np.linalg.norm(v) or 1.0)
         else:
             embs = self._model.encode(texts, batch_size=64, normalize_embeddings=True, show_progress_bar=False)

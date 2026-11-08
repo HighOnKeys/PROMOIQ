@@ -292,6 +292,52 @@ def test_judge_saying_no_open_question_rejects_candidate(tmp_path, monkeypatch):
     assert not any(any("no open question" in r for r in x["reasons"]) for x in rejected if x["scores"]["cliffhanger"] < gate)
 
 
+def _run_without_sentence_transformers(tmp_path, monkeypatch):
+    import sys
+    from src.pipeline import run
+
+    monkeypatch.setitem(sys.modules, "sentence_transformers", None)   # import now raises ImportError
+    d = tmp_path / "Test Show-scripts"
+    d.mkdir()
+    for n in (1, 2, 3):
+        # different words per episode, so later segments bring new vocabulary (that is what broke the old fallback)
+        extra = {1: "", 2: " The harbour lanterns burn.", 3: " Cardinal ledgers vanish at midnight."}[n]
+        (d / f"episode-00{n}-Episode {n}.txt").write_text(
+            SCRIPT.replace("Episode 1", f"Episode {n}").replace("You were always the fool.", "You were always the fool." + extra))
+    st = get_settings()
+    st.model.provider = "heuristic"
+    st.model.judge_provider = ""
+    st.model.cache_dir = tmp_path / "cache"
+    return run(d, settings=st, out_root=tmp_path / "out")
+
+
+def test_tfidf_fallback_vectors_stay_comparable(tmp_path, monkeypatch):
+    """Without sentence-transformers, segments primed in separate batches must still be comparable.
+    The old fallback refitted TF-IDF per batch, so the vector length changed and np.dot crashed."""
+    from src.construction.search import SegmentSimilarity
+
+    res = _run_without_sentence_transformers(tmp_path, monkeypatch)
+    show = res["show"]
+    sim = SegmentSimilarity(show)
+    segs = [(ep, k, k) for ep, tl in show.timelines.items() for k in range(len(tl.beats))]
+    ep1 = [x for x in segs if x[0] == 1]
+    rest = [x for x in segs if x[0] != 1]
+    sim.prime(ep1)                      # first batch: episode 1 only
+    first = sim.promo_vec(ep1[:2])
+    sim.prime(rest)                     # later batch brings words episode 1 never used
+    later = sim.promo_vec(rest[-2:])
+    assert sim.backend == "tfidf"
+    assert first.shape == later.shape
+    assert -1e-6 <= float(first @ later) <= 1 + 1e-6
+
+
+def test_pipeline_runs_end_to_end_on_tfidf_fallback(tmp_path, monkeypatch):
+    res = _run_without_sentence_transformers(tmp_path, monkeypatch)
+    meta = json.loads((tmp_path / "out/final/run_metadata.json").read_text())
+    assert meta["models"]["embeddings"] == "tfidf"
+    assert res["ranked"]
+
+
 def test_mmr_prefers_diverse_item():
     from src.ranking.portfolio import mmr_shortlist
     from src.schemas import PromoCandidate, Segment
