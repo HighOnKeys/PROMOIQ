@@ -28,13 +28,13 @@ Every number below comes from a command run during this audit.
 | Per promo: episode and start/end of every segment, in order | Done | `outputs/final/ranked_promos.json` / `.csv`; verified against source (§2) |
 | Hook, cliffhanger, one line on why it works | Done, but the "why" is weak | Present for all 10. The "why it works" line is generated from a template and generic; theme labels come from keywords (§4) |
 | Rank them: which to post first, and why | Done | Ranked by quality after a diversity pass; PDF page 1 table; `editorial_report.md` |
-| Check quality: where it picks badly | Done | `evaluation/failure_analysis.md` (26 cases), `evaluation_report.md`, blind reviews 1 and 2 |
+| Check quality: where it picks badly | Done | `evaluation/failure_analysis.md` (27 cases), `evaluation_report.md`, blind reviews 1 and 2 |
 | Solution doc: PDF, ≤ 2 pages | Done | `docs/PROMOIQ_solution.pdf`, 2 A4 pages (rendered and checked) |
 | Doc covers problem and why, assumptions, how it works, scale, how you know it's good incl. failures | Done | PDF sections, in that order |
 | Doc names the AI tools used and one place they got it wrong | Done | PDF "AI tools used" |
-| Prototype link that opens for anyone | **Not done (yours)** | Repo is local only, with no remote. See §6 |
-| Raw outputs folder, unedited, full pack | **Exists locally; not shared (yours)** | `outputs/` (git-ignored). See §8 |
-| Walkthrough video (optional) | Not done (yours) | Script: `docs/walkthrough_script.md` |
+| Prototype link that opens for anyone | Done | Public repo https://github.com/HighOnKeys/PROMOIQ, and the live app https://promoiq.streamlit.app/ (see §12) |
+| Raw outputs folder, unedited, full pack | Done | Shared in the submission's Drive folder (opens for anyone with the link); not in the public repo |
+| Walkthrough video (optional) | Not recorded | The live app replaces it |
 | Free tiers only | Done | $0: offline default; Gemini free tier (80 calls) |
 | Runs again on a new input | Done for this format | Folder and `.zip` input both tested (identical results). Another show is assumed to use the same screenplay layout |
 | Model easy to swap | Done, partly tested live | Set by environment variables. Gemini was tested live; Anthropic and OpenAI-compatible are implemented but **never run against a real API** |
@@ -163,7 +163,7 @@ pip install -r requirements.txt
 python -m pytest -q                                        # 33 tests, synthetic data only
 python -m src.pipeline                                     # offline, about 15-20 s -> outputs/
 python -m evaluation.verify_against_source --input data/input outputs/final/ranked_promos.json
-streamlit run app.py                                       # localhost only
+python -m streamlit run app.py                             # localhost; also live at promoiq.streamlit.app
 python -m src.pipeline --input path/to/new_show.zip --out outputs_new_show   # a new show
 python -m evaluation.benchmark                             # baselines + metrics + blind sheets
 ```
@@ -175,12 +175,11 @@ For the optional Gemini path, put `GEMINI_API_KEY` in `.env`, then run `python -
 | Deliverable | Location |
 |---|---|
 | Solution doc (submit) | `docs/PROMOIQ_solution.pdf` (built by `docs/build_solution_pdf.py`) |
-| Prototype (link it) | The repository root: `README.md` (run steps), `src/`, `app.py`, `config.py`, `tests/` |
+| Prototype (link it) | https://github.com/HighOnKeys/PROMOIQ (run steps in `README.md`), and the live app https://promoiq.streamlit.app/ |
 | Ranked promos (main result) | `outputs/final/ranked_promos.json`, `ranked_promos.csv`, `editorial_report.md`, `run_metadata.json` |
 | Raw outputs: share these | `outputs/raw/` (parsed events, all 3,367 candidates, evaluation results), `outputs/processed/` (story bible, graph, timelines, validated and rejected sets), `outputs/final/`, `outputs/gemini/` (live LLM run incl. `raw/llm_responses.jsonl` and logs), `outputs/evaluation*/` (blind sheets and keys) |
 | Not needed in the share | `outputs/history/` (earlier snapshots), `outputs/app_run/` (an older app run) |
 | Evaluation | `evaluation/evaluation_report.md`, `evaluation/failure_analysis.md`, `evaluation/results/` |
-| Walkthrough script | `docs/walkthrough_script.md` |
 | This audit | `evaluation/final_audit_report.md` |
 
 ## 10. Addendum: inspection of the final deliverables
@@ -217,4 +216,22 @@ Still yours to do:
 - The fallback now completes on the full pack, and its promos pass the source verifier.
 - It is a different run: 1,248 validated, and 7 of the same 10 promos. The documented results assume sentence-transformers.
 - That run is unchanged: the shortlist is identical, and 35 tests pass. See failure case 26.
+
+## 12. Addendum: the public deployment
+
+https://promoiq.streamlit.app/ opens without signing in, and it is built from the public repository, so it contains no screenplays.
+
+**Opened as a logged-out visitor,** pressing **Run analysis** on the default input gave a raw `FileNotFoundError` traceback.
+
+**Read for multi-user use,** the app had a second problem: every visitor's run wrote to one shared output folder.
+
+**Both are fixed (failure case 27):**
+- The app opens on Upload when it has no screenplays, and explains why.
+- Each run gets a private temporary folder.
+- Uploaded screenplays are deleted after parsing.
+- The Evaluation tab shows the live Gemini results instead of "Baseline A not run".
+
+**Tested headlessly** with the pack, without it, and with the real ZIP through a stand-in uploader. That run gave 1,243 validated, sentence-transformers similarity, and no uploaded files left on disk.
+
+**Not tested:** a real upload to the deployed server. Streamlit Community Cloud's memory limit with torch and MiniLM loaded is unverified until someone uploads the ZIP there once.
 

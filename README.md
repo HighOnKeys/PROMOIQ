@@ -19,7 +19,7 @@ Kumar Manas, roll no. 23119016, kumar_m@me.iitr.ac.in
 | Item | Where |
 |---|---|
 | Solution doc (2 pages) | [`docs/PROMOIQ_solution.pdf`](docs/PROMOIQ_solution.pdf) |
-| Prototype | this repository: run steps below, editorial app in `app.py` |
+| Prototype | this repository (run steps below) and the live app at **https://promoiq.streamlit.app/**. The live app ships without the screenplays: upload the pack's ZIP in the sidebar |
 | Raw outputs on the full pack | shared through the submission form only. They contain Kuku's screenplay text, so they are not in this public repo |
 | Quality evidence | [`evaluation/evaluation_report.md`](evaluation/evaluation_report.md), [`evaluation/failure_analysis.md`](evaluation/failure_analysis.md), [`evaluation/final_audit_report.md`](evaluation/final_audit_report.md) |
 
@@ -50,7 +50,7 @@ pip install -r requirements.txt                       # first run also downloads
    It checks that every cut is a real timestamp, that no line is split, that durations are 20–60 s, and that every evidence quote is in its cited block. It exits with code 1 on any problem.
 6. Open the editorial app:
    ```bash
-   python -m streamlit run app.py              # local editorial UI (bound to localhost)
+   python -m streamlit run app.py              # editorial UI on localhost; also live at promoiq.streamlit.app
    ```
    Use `python -m streamlit`, not plain `streamlit`. Plain `streamlit` can resolve to another environment's copy (for example conda base) that lacks sentence-transformers. The app then falls back to TF-IDF similarity, gives different results, and shows a warning.
 
@@ -155,7 +155,14 @@ Blind review round 1 (18 clips, 6 pairs) was rated by the AI coding assistant. I
 
 ## Confidentiality
 
-The input pack is Kuku's content. `data/`, `outputs/`, `*.zip` and the brief PDF are git-ignored. The app is bound to `localhost` with telemetry off. The tests use synthetic scripts only. Do **not** deploy the app publicly with the real pack. Share `outputs/` with Kuku through an unlisted "anyone with the link" folder (the brief asks for links that open for anyone who has them), never through a public repository.
+The input pack is Kuku's content. `data/`, `outputs/`, `*.zip` and the brief PDF are git-ignored. The tests use synthetic scripts only. Locally the app is bound to `localhost` with telemetry off.
+
+The public deployment at https://promoiq.streamlit.app/ is built from this repository, so it contains **no** screenplays. Visitors upload a ZIP, and:
+- each run writes to its own temporary folder, never shared between visitors;
+- uploaded screenplays are deleted from the server as soon as they are parsed;
+- a session's previous results are removed when it starts a new run.
+
+Never add the pack to the repository or to the deployment. Share `outputs/` with Kuku through an unlisted "anyone with the link" folder (the brief asks for links that open for anyone who has them), never through a public repository.
 
 ## Project layout
 
@@ -171,6 +178,6 @@ src/llm/               provider-agnostic gateway (cache, retries, raw log, usage
 src/pipeline.py        end-to-end orchestration (CLI)
 app.py                 Streamlit editorial UI
 evaluation/            baselines, benchmark, source verifier, review summary, failure analysis, final audit, human-eval templates
-docs/                  2-page solution PDF (+ builder), walkthrough script
+docs/                  2-page solution PDF (+ builder)
 tests/                 unit + end-to-end tests
 ```

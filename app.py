@@ -1,8 +1,10 @@
-"""PROMOIQ editorial interface (local Streamlit app).
+"""PROMOIQ editorial interface (Streamlit).
 
-    streamlit run app.py
+    python -m streamlit run app.py
 
-Runs locally on purpose: the screenplays are confidential and must not be hosted publicly.
+Locally it reads data/input. The public deployment ships WITHOUT the confidential screenplays: visitors upload
+a ZIP. Each run writes to its own temporary folder (never shared between sessions), and uploaded screenplays
+are deleted from the server as soon as they have been parsed.
 """
 from __future__ import annotations
 
@@ -32,9 +34,16 @@ st.title("PROMOIQ · promo discovery for microdrama screenplays")
 st.warning(LIMITATION)
 
 # ------------------------------------------------------------------ sidebar
+_input_dir = get_settings().paths.input_dir
+HAS_LOCAL = _input_dir.exists() and any(_input_dir.rglob("*.txt"))
+
 with st.sidebar:
     st.header("1 · Input")
-    source = st.radio("Screenplays", ["Local folder (data/input)", "Upload ZIP or .txt files"])
+    source = st.radio("Screenplays", ["Local folder (data/input)", "Upload ZIP or .txt files"],
+                      index=0 if HAS_LOCAL else 1)
+    if not HAS_LOCAL:
+        st.info("This copy does not include any screenplays (Kuku's pack is confidential). Upload the episode ZIP "
+                "or .txt files. They are processed for your session only and deleted after parsing.")
     uploads = None
     if source.startswith("Upload"):
         uploads = st.file_uploader("Episode files", type=["zip", "txt"], accept_multiple_files=True)
@@ -57,6 +66,9 @@ with st.sidebar:
 
 def _prepare_input() -> Path | None:
     if source.startswith("Local"):
+        if not HAS_LOCAL:
+            st.error("No screenplays in data/input on this server. Choose 'Upload ZIP or .txt files' in the sidebar.")
+            return None
         return s.paths.input_dir
     if not uploads:
         st.error("Upload a ZIP or episode .txt files first.")
@@ -84,7 +96,11 @@ if go:
     if inp is not None:
         s.model.provider = provider
         s.model.model = model
-        out_root = ROOT / "outputs" / "app_run"
+        # one private output folder per run: a shared folder would let one visitor download another's results
+        old = st.session_state.get("out_root")
+        if old is not None and Path(old).name.startswith("promoiq_out_"):
+            shutil.rmtree(old, ignore_errors=True)
+        out_root = Path(tempfile.mkdtemp(prefix="promoiq_out_"))
         bar = st.progress(0.0, text="Starting")
         try:
             res = run(inp, settings=s, out_root=out_root, progress=lambda m, f: bar.progress(min(1.0, f), text=m))
@@ -93,6 +109,9 @@ if go:
             bar.progress(1.0, text="Done")
         except Exception as exc:  # surface errors, never swallow them
             st.exception(exc)
+        finally:
+            if source.startswith("Upload"):   # uploaded screenplays are not kept on the server
+                shutil.rmtree(inp.parent, ignore_errors=True)
 
 res = st.session_state.get("res")
 if not res:
@@ -214,14 +233,25 @@ with tabs[3]:
 
 # ------------------------------------------------------------------ evaluation
 with tabs[4]:
+    st.caption("Results from the documented runs on Kuku's full 50-episode pack (`evaluation/results/`), "
+               "not from the run above.")
     bench = ROOT / "evaluation" / "results" / "benchmark_table.md"
     if bench.exists():
-        st.markdown("**Baseline comparison** (from `python -m evaluation.benchmark`)")
-        st.markdown(bench.read_text())
+        st.markdown("**Baseline comparison, offline run** (`python -m evaluation.benchmark`, no LLM, "
+                    "so the LLM-only baseline A is in the next table)")
+        st.markdown(bench.read_text().split("\nBaseline A (LLM-only)")[0])
+    gbench = ROOT / "evaluation" / "results" / "gemini" / "benchmark_table.md"
+    if gbench.exists():
+        st.markdown("**Live Gemini run** (free tier): PROMOIQ on Gemini, and baseline A = LLM-only extraction")
+        st.markdown(gbench.read_text())
     rs = ROOT / "evaluation" / "results" / "round1" / "review_summary_ai_review_ratings.json"
     if rs.exists():
         st.markdown("**Blind review round 1** (AI assistant reviewer, not human)")
         st.json(json.loads(rs.read_text())["systems"])
+    r2 = ROOT / "evaluation" / "results" / "round2" / "blind_review_ai_round2.json"
+    if r2.exists():
+        st.markdown("**Blind review round 2** (fresh AI reviewer, source text only, labels hidden; not human)")
+        st.json(json.loads(r2.read_text())["summary"])
     st.markdown("**Run metadata**")
     st.json(meta)
 

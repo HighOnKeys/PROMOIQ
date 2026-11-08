@@ -238,6 +238,7 @@ The failures below are about judgment and packaging.
 | 24 | `requirements.txt` named the legacy Gemini SDK | A (clean install) | Fixed |
 | 25 | ZIP upload check used a string prefix | A (code read) | Fixed |
 | 26 | App crashed when sentence-transformers was missing | Rehearsal (crash in the app) | Fixed + test |
+| 27 | Public deployment: traceback with no pack, and one output folder shared by every visitor | Checking the live app | Fixed |
 
 ## 20. The offline #1 ends one line before its payoff (open)
 - **What happened.** PROMO-01 (E27, 01:32.80–02:04.60) ends on the line "You hear that?!". The next line, 1.7 s later, is the twist: the villain turns Juliana's words into a confession. The blind reviewer dropped the clip. The Gemini run's version of the same scene ends 3.9 s later and includes the twist; the reviewer rated it cliffhanger 5/5.
@@ -291,7 +292,22 @@ The failures below are about judgment and packaging.
 - **Fix.**
   - TF-IDF is fitted once, on every beat of the show, so the vector length never changes during a run.
   - The app now warns when it is running on the fallback.
-  - The README and the walkthrough script use `python -m streamlit`, which runs the project's own Python.
+  - The README uses `python -m streamlit`, which runs the project's own Python.
   - A test forces the fallback and primes similarity in two batches. It fails on the old code.
 - **Effect.** On the same setup, the full pack now completes, and all 10 promos pass the source verifier. But TF-IDF similarity gives a different run: 1,248 validated instead of 1,243, and 7 of the same 10 promos. So the documented results assume sentence-transformers.
+
+## 27. The public deployment showed a traceback and shared one output folder between visitors (fixed)
+- **What happened.** I opened https://promoiq.streamlit.app/ and pressed **Run analysis**. The default input, "Local folder", is empty on the server: the pack is not in the repository, on purpose. The first thing a reviewer would see was `FileNotFoundError: no episode .txt files under /mount/src/promoiq/data/input`.
+- **A second problem, found reading the code.**
+  - Every run wrote to the same `outputs/app_run` folder, and the Ranked promos and Export tabs read from it.
+  - Locally that is harmless. On a public server, two visitors running at once could overwrite each other's files, so one could download the other's results. If a reviewer had uploaded Kuku's pack, those results would contain screenplay text.
+- **Fix.**
+  - When the server has no screenplays, the app opens on "Upload ZIP or .txt files" and explains why. Choosing the empty local folder now gives a plain message, not a traceback.
+  - Each run writes to its own temporary folder, and a session's previous folder is removed on its next run.
+  - Uploaded screenplays are deleted as soon as the run has parsed them.
+  - The Evaluation tab no longer prints the offline benchmark's "Baseline A not run" line. It shows the live Gemini table, which does include the LLM-only baseline A, and both blind reviews.
+- **Checked** by driving the app headlessly, in three cases:
+  - **With the pack:** 1,243 validated, written to a private temporary folder.
+  - **Without the pack:** opens on Upload with the notice; pressing Run without a file gives a plain message.
+  - **Uploading the real ZIP through a stand-in uploader:** 50 episodes, 1,243 validated, sentence-transformers similarity, and the uploaded screenplays gone from the server afterwards.
 

@@ -66,7 +66,8 @@ W = A4[0] - 2.4 * cm
 story = []
 story += [P("PROMOIQ: narrative-aware promo discovery for microdrama screenplays", h1),
           P("<b>Kumar Manas</b> · Roll no. 23119016 · kumar_m@me.iitr.ac.in · Code and run steps: "
-            "<a href=\"https://github.com/HighOnKeys/PROMOIQ\" color=\"blue\">github.com/HighOnKeys/PROMOIQ</a>", small),
+            "<a href=\"https://github.com/HighOnKeys/PROMOIQ\" color=\"blue\">github.com/HighOnKeys/PROMOIQ</a> · Live app: "
+            "<a href=\"https://promoiq.streamlit.app/\" color=\"blue\">promoiq.streamlit.app</a>", small),
           P(f"Kuku AI Generalist assignment · Problem 1: Find the Promos · show: <i>{m['show']}</i> (50 episodes)", small),
           Spacer(1, 3)]
 
@@ -204,7 +205,7 @@ story += [P("Where it picks badly (real failures from this build)", h2), P(
     "cut, but the cliffhanger scorer rates a question mark (9.37) above an accusation (7.98); not changed, so as not to ship an "
     "unvalidated ranking. A Gemini pick ended on a resolution that its own judge had flagged, and the gates ignored that verdict; it is "
     "now a gate (offline shortlist unchanged). Both lists repeat a payoff across episodes, which the duplicate check misses. "
-    "See evaluation/failure_analysis.md (26 cases: 8 from the live Gemini run, 7 from the final audit and rehearsal).")]
+    "See evaluation/failure_analysis.md (27 cases: 8 from the live Gemini run, 8 from the final audit, rehearsal and deployment).")]
 
 story += [P("Scale and cost", h2), P(
     "Offline: ~20 s per 50-episode show on one laptop CPU, with no API cost. Shows are independent, so weekly releases parallelise "
@@ -231,7 +232,7 @@ story += [P("Limitations", h2), P(
     "cut. Scores are heuristic proxies, not audience predictions, and the weights are untuned hypotheses. The LLM paths are built "
     "and live-tested only within free-tier limits (19 LLM-judged candidates, Baseline A on 28 of 50 episodes). The offline judges are not independent of the generator. Descriptive speaker labels "
     "(\"LADY IN GOLD GOWN\") are not resolved to names offline. Episode order is assumed to be story order. The input format is "
-    "assumed to be Kuku's screenplay layout. Prototype: GitHub repo with run steps; the app is local only because the pack is confidential.")]
+    "assumed to be Kuku's screenplay layout. Prototype: GitHub repo with run steps, and a live app at promoiq.streamlit.app that ships without the confidential pack (upload the ZIP; uploads are deleted after parsing).")]
 
 doc = SimpleDocTemplate(str(ROOT / "docs" / "PROMOIQ_solution.pdf"), pagesize=A4, leftMargin=1.2 * cm,
                         rightMargin=1.2 * cm, topMargin=1.0 * cm, bottomMargin=0.9 * cm,
